@@ -6,6 +6,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import gsap from "gsap";
 import { disciplines, projects, statistics } from "./content.js";
 import VantaBackdrop from "./components/VantaBackdrop.jsx";
 import FounderSphere from "./components/FounderSphere.jsx";
@@ -71,10 +72,8 @@ function Header() {
 
 function Hero() {
   return (
-    <section className="hero" id="top" aria-labelledby="hero-title">
+    <section className="hero hero--exhibition" id="top" aria-labelledby="hero-title">
       <VantaBackdrop />
-      <div className="hero__grid-line hero__grid-line--vertical" aria-hidden="true" />
-      <div className="hero__grid-line hero__grid-line--horizontal" aria-hidden="true" />
       <div className="hero__inner page-wrap">
         <div className="hero__copy">
           <p className="eyebrow hero__eyebrow">
@@ -102,16 +101,14 @@ function Hero() {
           </div>
         </div>
 
-        <a className="hero-art" href="#gallery" aria-label="Explore Geometric Residential Lounge" data-cursor="EXPLORE">
+        <a className="hero-art hero-art--aperture" href="#gallery" aria-label="Explore Geometric Residential Lounge">
           <div className="hero-art__frame">
             <img
               src={projects[0].image}
               alt={projects[0].alt}
               fetchPriority="high"
             />
-            <span className="hero-art__topline" aria-hidden="true" />
-            <span className="hero-art__corner hero-art__corner--tl" aria-hidden="true" />
-            <span className="hero-art__corner hero-art__corner--br" aria-hidden="true" />
+            <span className="hero-art__datum" aria-hidden="true" />
             <div className="hero-art__caption">
               <span>Featured Render</span>
               <strong>Geometric Residential Lounge</strong>
@@ -124,21 +121,22 @@ function Hero() {
         <span className="hero__scroll-cue"><span /> Scroll to explore</span>
         <span className="hero__bottom-label">Interior Architecture · Bespoke Design</span>
       </div>
-      <div className="hero__glow" aria-hidden="true" />
     </section>
   );
 }
 
 function Stats() {
   return (
-    <section className="stats page-wrap" aria-label="Studio highlights">
-      {statistics.map(([value, label], index) => (
-        <div className="stat" key={label}>
-          <span className="stat__index">0{index + 1}</span>
-          <strong>{value}</strong>
-          <span>{label}</span>
-        </div>
-      ))}
+    <section className="stats-band" aria-label="Studio highlights">
+      <div className="stats page-wrap">
+        {statistics.map(([value, label], index) => (
+          <div className="stat" key={label}>
+            <span className="stat__index">0{index + 1}</span>
+            <strong>{value}</strong>
+            <span>{label}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -165,12 +163,12 @@ function Philosophy() {
               loading="lazy"
             />
             <span className="philosophy__image-number">P—03</span>
+            <span className="philosophy__datum" aria-hidden="true" />
           </div>
           <div className="philosophy__image-caption">
             <span>Material study</span>
             <span>Walnut · Bronzed steel · Glass</span>
           </div>
-          <span className="philosophy__corner" aria-hidden="true" />
         </div>
         <div className="philosophy__content reveal">
           <SectionLabel number="01">Our Core Philosophy</SectionLabel>
@@ -204,21 +202,20 @@ function Philosophy() {
   );
 }
 
-function ProjectCard({ project, onOpen }) {
+function ProjectCard({ project, index, onOpen }) {
   return (
     <button
-      className="portfolio-panel"
+      className={`portfolio-panel${index % 2 ? " portfolio-panel--reverse" : ""}`}
       type="button"
       onClick={() => onOpen(project)}
-      data-cursor="VIEW"
       aria-label={`Open project details: ${project.title}`}
       aria-haspopup="dialog"
     >
       <span className="portfolio-panel__image">
         <img src={project.image} alt={project.alt} loading="lazy" />
-        <span className="portfolio-panel__index">{project.number} <i /> {project.subtitle}</span>
-        <span className="portfolio-panel__image-title">{project.title}</span>
-        <span className="portfolio-panel__frame" aria-hidden="true" />
+        <span className="portfolio-panel__image-index" aria-hidden="true">{project.number}</span>
+        <span className="portfolio-panel__image-subtitle">{project.subtitle}</span>
+        <span className="portfolio-panel__datum" aria-hidden="true" />
       </span>
       <span className="portfolio-panel__copy">
         <span className="portfolio-panel__eyebrow">{project.subtitle}</span>
@@ -238,15 +235,51 @@ function ProjectCard({ project, onOpen }) {
 
 function ProjectDialog({ project, onClose }) {
   const dialogRef = useRef(null);
+  const timelineRef = useRef(null);
+  const closingRef = useRef(false);
 
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog) return;
-    if (project && !dialog.open) dialog.showModal();
-    if (!project && dialog.open) dialog.close();
+    if (!dialog || !project) return undefined;
+
+    closingRef.current = false;
+    const inner = dialog.querySelector(".project-dialog__inner");
+    const image = dialog.querySelector(".project-dialog__image img");
+    const copyItems = [...dialog.querySelectorAll(".project-dialog__copy > *")];
+
+    gsap.set(dialog, { autoAlpha: 0 });
+    gsap.set(inner, { y: 30, scale: 0.975, clipPath: "inset(4% 2% 0% 2%)" });
+    gsap.set(image, { scale: 1.12 });
+    dialog.showModal();
+
+    timelineRef.current = gsap.timeline({ defaults: { overwrite: "auto" } })
+      .to(dialog, { autoAlpha: 1, duration: 0.26, ease: "power1.out" })
+      .to(inner, { y: 0, scale: 1, clipPath: "inset(0% 0% 0% 0%)", duration: 0.72, ease: "expo.out" }, "-=0.08")
+      .to(image, { scale: 1, duration: 0.86, ease: "power3.out" }, "-=0.65")
+      .fromTo(copyItems, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.42, stagger: 0.045, ease: "power3.out" }, "-=0.54");
+
+    return () => {
+      timelineRef.current?.kill();
+      gsap.killTweensOf([dialog, inner, image, ...copyItems]);
+    };
   }, [project]);
 
   if (!project) return null;
+
+  const closeWithMotion = () => {
+    const dialog = dialogRef.current;
+    if (!dialog?.open || closingRef.current) return;
+    closingRef.current = true;
+    const inner = dialog.querySelector(".project-dialog__inner");
+    timelineRef.current?.kill();
+    timelineRef.current = gsap.timeline({
+      onComplete: () => {
+        closingRef.current = false;
+        if (dialog.open) dialog.close();
+      },
+    }).to(inner, { y: 12, scale: 0.985, autoAlpha: 0, duration: 0.22, ease: "power2.in" })
+      .to(dialog, { autoAlpha: 0, duration: 0.18, ease: "power1.in" }, "-=0.1");
+  };
 
   return (
     <dialog
@@ -255,7 +288,7 @@ function ProjectDialog({ project, onClose }) {
       aria-labelledby="project-dialog-title"
       onClose={onClose}
       onClick={(event) => {
-        if (event.target === dialogRef.current) dialogRef.current.close();
+        if (event.target === dialogRef.current) closeWithMotion();
       }}
     >
       <div className="project-dialog__inner">
@@ -263,9 +296,10 @@ function ProjectDialog({ project, onClose }) {
           className="project-dialog__close"
           type="button"
           aria-label="Close project details"
-          onClick={() => dialogRef.current?.close()}
+          onClick={closeWithMotion}
         >
-          <X size={20} />
+          <span>Close</span>
+          <X size={18} />
         </button>
         <div className="project-dialog__image">
           <img src={project.image} alt={project.alt} />
@@ -293,9 +327,9 @@ function ProjectDialog({ project, onClose }) {
 function Portfolio() {
   const [selectedProject, setSelectedProject] = useState(null);
   return (
-    <section className="portfolio portfolio--kinetic section-pad" id="gallery" aria-labelledby="portfolio-title">
-      <div className="portfolio__stage">
-        <div className="portfolio__head page-wrap reveal">
+    <section className="portfolio portfolio--exhibition section-pad" id="gallery" aria-labelledby="portfolio-title">
+      <div className="page-wrap">
+        <div className="portfolio__head reveal">
           <div>
             <SectionLabel number="02">Portfolio Highlights</SectionLabel>
             <h2 id="portfolio-title">Signature <em>Masterpieces</em></h2>
@@ -304,22 +338,16 @@ function Portfolio() {
             Interactive 3D rendering cards displaying key zones of our latest architectural projects. Click on any card to view detailed blueprints and material specifications.
           </p>
         </div>
-        <div className="portfolio__rail-label page-wrap" aria-hidden="true">
-          <span>Scroll to move through the work</span>
-          <span>Selected works / 2023—25</span>
-        </div>
-        <div className="portfolio__viewport">
-          <div className="portfolio__track">
-            {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} onOpen={setSelectedProject} />
-            ))}
-          </div>
-        </div>
-        <div className="portfolio__progress page-wrap" aria-hidden="true">
+        <div className="portfolio__progress" aria-hidden="true">
           <span className="portfolio__progress-current">01</span>
           <span className="portfolio__progress-track"><span className="portfolio__progress-fill" /></span>
           <span>03</span>
           <span className="portfolio__progress-label">Selected works</span>
+        </div>
+        <div className="portfolio__sequence">
+          {projects.map((project, index) => (
+            <ProjectCard key={project.id} project={project} index={index} onOpen={setSelectedProject} />
+          ))}
         </div>
       </div>
       <ProjectDialog project={selectedProject} onClose={() => setSelectedProject(null)} />
@@ -366,10 +394,6 @@ function Founders() {
   );
 }
 
-function PointerLens() {
-  return <div className="pointer-lens" aria-hidden="true"><span>VIEW</span></div>;
-}
-
 function Footer() {
   return (
     <footer className="site-footer">
@@ -396,7 +420,6 @@ export default function App() {
     <div ref={pageRef} className="site-shell">
       <a className="skip-link" href="#main">Skip to content</a>
       <Header />
-      <PointerLens />
       <main id="main">
         <Hero />
         <Stats />

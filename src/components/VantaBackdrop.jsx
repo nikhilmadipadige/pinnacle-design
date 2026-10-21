@@ -5,67 +5,84 @@ export default function VantaBackdrop() {
 
   useEffect(() => {
     const element = elementRef.current;
+    if (!element || !window.WebGLRenderingContext) return undefined;
+
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const narrowScreen = window.matchMedia("(max-width: 760px)");
-    if (!element || reduceMotion.matches || narrowScreen.matches || !window.WebGLRenderingContext) return undefined;
-
-    let effect;
+    let effect = null;
     let cancelled = false;
     let idleId;
     let usingIdleCallback = false;
 
-    const start = () => {
-      if (cancelled || reduceMotion.matches || !elementRef.current) return;
-      Promise.all([import("three"), import("vanta/dist/vanta.fog.min")])
-        .then(([threeModule, vantaModule]) => {
-          if (cancelled || reduceMotion.matches || !elementRef.current) return;
-          const THREE = threeModule.default ?? threeModule;
-          const FOG = vantaModule.default ?? vantaModule;
-          effect = FOG({
-            el: elementRef.current,
-            THREE,
-            mouseControls: false,
-            touchControls: false,
-            gyroControls: false,
-            minHeight: 220,
-            minWidth: 280,
-            scale: 1,
-            scaleMobile: 1,
-            highlightColor: 0x887557,
-            midtoneColor: 0x304849,
-            lowlightColor: 0x142020,
-            baseColor: 0x121212,
-            blurFactor: 0.65,
-            speed: 0.36,
-            zoom: 0.72,
-          });
-        })
-        .catch(() => {
-          // The CSS atmosphere remains as a complete fallback if WebGL or the effect is unavailable.
-        });
+    const canStart = () => !cancelled && !reduceMotion.matches && !narrowScreen.matches && elementRef.current;
+    const destroy = () => {
+      effect?.destroy();
+      effect = null;
+      element.classList.remove("vanta-backdrop--ready");
     };
-
-    const onMotionChange = (event) => {
-      if (event.matches) {
-        effect?.destroy();
-        effect = null;
+    const start = async () => {
+      if (!canStart() || effect) return;
+      try {
+        const [threeModule, vantaModule] = await Promise.all([
+          import("three"),
+          import("vanta/dist/vanta.net.min"),
+        ]);
+        if (!canStart()) return;
+        const THREE = threeModule.default ?? threeModule;
+        const NET = vantaModule.default ?? vantaModule;
+        effect = NET({
+          el: elementRef.current,
+          THREE,
+          mouseControls: true,
+          touchControls: false,
+          gyroControls: false,
+          minHeight: 280,
+          minWidth: 320,
+          scale: 1,
+          scaleMobile: 0.72,
+          color: 0xc5a880,
+          backgroundColor: 0x121212,
+          points: 8,
+          maxDistance: 27,
+          spacing: 23,
+          showDots: false,
+          mouseCoeffX: 0.48,
+          mouseCoeffY: 0.34,
+        });
+        element.classList.add("vanta-backdrop--ready");
+      } catch {
+        // The CSS datum-light fallback remains intact if WebGL or Vanta is unavailable.
       }
     };
-    reduceMotion.addEventListener?.("change", onMotionChange);
 
-    if ("requestIdleCallback" in window) {
-      usingIdleCallback = true;
-      idleId = window.requestIdleCallback(start, { timeout: 2400 });
-    } else {
-      idleId = window.setTimeout(start, 900);
-    }
+    const schedule = () => {
+      destroy();
+      if (!canStart()) return;
+      if ("requestIdleCallback" in window) {
+        usingIdleCallback = true;
+        idleId = window.requestIdleCallback(start, { timeout: 1800 });
+      } else {
+        usingIdleCallback = false;
+        idleId = window.setTimeout(start, 700);
+      }
+    };
+    const onCapabilityChange = () => {
+      if (usingIdleCallback) window.cancelIdleCallback?.(idleId);
+      else window.clearTimeout(idleId);
+      schedule();
+    };
+
+    reduceMotion.addEventListener?.("change", onCapabilityChange);
+    narrowScreen.addEventListener?.("change", onCapabilityChange);
+    schedule();
 
     return () => {
       cancelled = true;
       if (usingIdleCallback) window.cancelIdleCallback?.(idleId);
       else window.clearTimeout(idleId);
-      reduceMotion.removeEventListener?.("change", onMotionChange);
-      effect?.destroy();
+      reduceMotion.removeEventListener?.("change", onCapabilityChange);
+      narrowScreen.removeEventListener?.("change", onCapabilityChange);
+      destroy();
     };
   }, []);
 

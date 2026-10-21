@@ -1,48 +1,51 @@
-# Pinnacle Design Studio — Kinetic Rebuild Plan
+# Pinnacle Design Studio — Architectural Exhibition Revision
 
 ## Product and implementation
 
-Keep the existing approved copy, statistics, brand wordmark, palette, project descriptions, and three current interior photographs. This is a presentation redesign, not a content rewrite or lead-generation funnel: retain the no-enquiry decision, do not invent founder biographies/roles/portraits, and represent all five founders as equal peers. Vijay Williams is named; the other four remain editable placeholders. Use the next three client images when supplied.
+This is a visual and interaction overhaul, not a copy rewrite. Preserve the approved content, statistics, project descriptions/specifications, existing logo, palette, and no-enquiry decision. Do not add contact/lead-generation content, invent founder biographies/roles, or use project imagery as founder portraits. Keep five equal founders: Vijay Williams plus four editable name placeholders. Continue using the three existing interior photographs until the client sends replacements.
 
-Keep the static React + Vite app and Vercel deployment configuration. Use the existing libraries as deliberate parts of the experience: GSAP plus its official SplitText and ScrollTrigger plugins for typography, pinned sections, progress, and scroll choreography; Lenis for smooth scrolling synchronized with ScrollTrigger; Three.js for the founders' interactive 3D sphere; Vanta.js only for the hero's existing restrained atmospheric backdrop. Load the Three.js founders scene lazily when near the viewport and dispose its WebGL resources safely. Avoid adding libraries that duplicate these capabilities.
+Keep the static React + Vite site and Vercel build configuration. Use the existing libraries for clear, visible purposes: Lenis owns smooth page scrolling and is synchronized with GSAP's ticker and ScrollTrigger; GSAP/SplitText/ScrollTrigger choreographs hero typography, photo apertures, project reveals, counters, and section entrances; Vanta.js provides a distinct interactive architectural network field only in the hero; Three.js creates a sculptural five-node founders orbit. Do not add duplicate animation libraries.
 
-## Project structure
+## Design movement
 
-- `src/App.jsx`: existing page copy and composition, navigation, portfolio dialog, disciplines, founder experience mount.
-- `src/components/FounderSphere.jsx`: lazy Three.js scene, five identical geometric founder bubbles, mouse/touch orbit, scroll-wheel navigation, snap/inertia, and accessible equal-weight controls.
-- `src/components/VantaBackdrop.jsx`: optional hero atmosphere with static fallback.
-- `src/hooks/useMotion.js`: Lenis/ScrollTrigger synchronization, SplitText hero sequence, statistics count-up, parallax/image masks, pinned horizontal portfolio choreography, and section transitions.
-- `src/content.js`: all existing approved project/statistics/disciplines copy and the five editable founder labels.
-- `src/styles.css`: preserve the locked palette and typography while rebuilding the first impression, pinned project rail, and immersive founder stage for desktop/tablet/mobile.
-- `public/images/`: current replaceable project photographs and logo; do not present an interior image as a founder portrait.
-- `public/manus-routes.json`, `vercel.json`, `package.json`, and `index.html`: single-page routing, Vercel build, dependencies, and page metadata.
+**Architectural after-dark exhibition:** related to the reference through the dark luxury atmosphere, warm metallic light, and orbital founder interaction, but authored as Pinnacle rather than a copy of its layout. Large interiors should carry the visual weight. The page should feel like entering a private architectural gallery, not operating a dashboard, reading a generic agency template, or being forced through a scroll-jacked carousel.
 
-## Design direction
+**Pinnacle Datum:** use one thin, rising diagonal meeting a horizontal baseline, derived from the existing geometric mark. Carry it sparingly through the hero photo aperture, one project progress rule, discipline dividers, and the founders' orbital axis. This is the sole recurring graphic signature; avoid extra grids, micro-labels, and redundant rings/corner frames.
 
-**Design movement:** cinematic kinetic editorialism crossed with architectural instrument design: the page should feel like moving through a designed space, not reading a conventional agency template.
+**Palette:** keep `#121212` black, `#191816` charcoal, `#24221f` bronze, `#f5f3ef` cream, `#c5a880` gold, and only the existing subdued blue-green reflection. Do not introduce a new dominant hue.
 
-**Core principles:** (1) scale creates impact, (2) motion reveals spatial meaning, (3) all five founders share identical visual rules, (4) the original content and palette remain intact.
+**Typography:** retain Playfair Display for expressive headings and Outfit for navigation/body/metadata. Increase scale and negative space; use fewer, larger editorial gestures.
 
-**Color philosophy:** retain `#121212` black, `#191816` charcoal, `#24221f` bronze, `#f5f3ef` cream, and `#c5a880` gold. Keep the sample's existing blue-green light bloom as an atmospheric accent, never as a new dominant color.
+## Page composition
 
-**Layout paradigm:** an asymmetric editorial hero; a slow, image-led philosophy interlude; a GSAP-pinned horizontal project rail on desktop (native swipe/scroll stack on mobile); a large, full-width founders' orbit with a deep 3D field and five equally sized bubbles.
+1. **Header:** compact translucent navigation with the existing four sections only: Studio, Works, Disciplines, Founders. Keep the brand mark and EST. 2023. No Contact or Inquire.
+2. **Hero:** asymmetric, near-full-height composition. Preserve the exact two-line headline, description, and approved links. Make the lounge image a large right-hand architectural aperture that bleeds to the viewport edge, crossed by one Pinnacle Datum. Vanta's gold/bronze network glides subtly behind the copy/photo boundary and responds to pointer movement; a CSS fallback preserves the same tone.
+3. **Stats:** keep the four approved metrics in a generous, architectural specification band; count each value once on first entry.
+4. **Philosophy:** move through a large partition/material-study image and the existing approved copy, with a slow mask reveal and restrained parallax.
+5. **Projects:** replace the pinned horizontal carousel with three natural-scroll, photo-led exhibition plates. Alternate image/copy composition, let each room image occupy most of its section, keep one concise specification visible, and preserve the details dialog. No scroll hijacking. On selection, GSAP opens the native dialog with a short editorial image/panel reveal; native cursor, close button, backdrop close, and Escape must remain usable.
+6. **Disciplines:** three open, full-width drawing-schedule rows with large numerals, generous type, and one moving datum rule—no floating dashboard cards.
+7. **Founders:** one immersive Three.js sculpture: a central low-contrast wire/metal sphere with five equal, glass-and-bronze spherical nodes around it. No names or portraits baked into the nodes. One shared caption, five equal keyboard/touch controls, no founder preselected, and the same selection transition for every person. Support drag and wheel; preserve a calm static state and controls under reduced motion.
+8. **Footer:** quiet colophon, existing wordmark, approved closing sentence, section links, and back-to-top; no enquiry/contact form or details.
 
-**Signature elements:** a split/revealing typographic hero; a horizontal project reel with a precise progress instrument; a five-node orbital sphere of abstract geometric bubbles, with equal rotation, sizing, and founder treatment.
+## Motion and interaction
 
-**Interaction philosophy:** tactile and discoverable. Drag, wheel, touch, or arrow-key input rotates the founders sphere with momentum and equal snapping. The name in the shared caption changes using the same transition for every node. The bubbles use abstract geometry—not invented headshots. Portfolio projects move horizontally with page scroll on desktop and remain directly swipeable on touch devices. Keep native keyboard focus and reduced-motion alternatives.
+- **Lenis:** one page-level instance with a measured inertia/lerp profile, natural vertical scrolling, anchor offsets, and a GSAP ticker bridge; do not intercept general wheel input.
+- **GSAP/SplitText:** staged title-line/character reveal, followed by the hero image aperture and supporting copy; section labels, project panels, discipline rules, count-up values, and modal transition each have distinct timing and meaning.
+- **ScrollTrigger:** synchronize with Lenis, use scrubbed image/parallax masks for visual depth, and reveal sections when they enter naturally. Avoid pinned page sections and horizontal page motion.
+- **Vanta:** use the installed Vanta NET effect with a restrained gold line field, pointer-driven camera movement, sensible density, hero-only scope, lazy load, teardown, and a reduced-motion/low-performance fallback.
+- **Three.js:** load the founders scene lazily, use actual lit spherical geometry/materials rather than flat text discs, preserve equal bubble sizing/material/interaction, dispose all GPU resources, and guard WebGL failure.
+- **Accessibility:** maintain visible native cursor and clear focus states; all project dialogs can be closed by button, backdrop, or Escape; keyboard controls select all founders; respect `prefers-reduced-motion`, touch, mobile layout, and WebGL-unavailable fallback.
 
-**Animation:** Lenis runs the main scroll and calls `ScrollTrigger.update`; GSAP SplitText staggers hero characters into view; a pinned ScrollTrigger translates the project rail with live progress; images use clip-path and parallax reveals; counters animate only when entering view. Three.js animates the founders' geometry with subdued idle drift; user drag applies momentum, wheel and touch move through the orbit, and keyboard controls snap any founder to the same front position. Turn off nonessential autoplay under `prefers-reduced-motion`, keep content visible without animation, and avoid loading the 3D scene until it is near view.
+## Project files
 
-**Typography system:** continue Playfair Display for display titles and Outfit for navigation, controls, body copy, and technical labels. Oversized titles are carefully clipped per line; captions remain short, tracked, and high contrast.
-
-**Brand essence:** bespoke interior architecture for people who know the studio and its founders; architectural, tactile, and assured.
-
-**Brand voice:** retain approved wording and tone; examples remain “YOUR DREAM, OUR CANVAS.” and “Every line has a purpose; every divider, shelf, and ceiling recess is calculated to direct flow and focus.”
-
-**Wordmark and mark:** retain the existing PINNACLE / DESIGN STUDIO lock-up and geometric line symbol.
-
-**Signature brand color:** existing luxury gold `#c5a880`.
+- `src/App.jsx`: content/layout, project dialog, and page sections.
+- `src/styles.css`: editorial design system, responsive project plates, accessible controls, and motion-safe fallbacks.
+- `src/hooks/useMotion.js`: Lenis/GSAP synchronization and section-specific motion.
+- `src/components/VantaBackdrop.jsx`: optional hero network and CSS fallback.
+- `src/components/FounderSphere.jsx`: lazy Three.js founders sculpture and peer controls.
+- `src/content.js`: approved content and editable founder labels.
+- `public/images/`, `vercel.json`, `vite.config.js`, `package.json`: existing images, static deployment setup, and build dependencies.
 
 ## Delivery constraints
 
-No founder portraits or personal details were supplied; the 3D node textures are abstract, not synthetic human likenesses. Keep the three current photos until the client sends the three replacement images. Repository push is not proof of a Vercel deployment; report deployment only if independently confirmed.
+A repository push is not proof of a Vercel deployment. The public domain previously served the old bundle, and no Vercel project association/status is visible in this session; report that accurately. Replace project images and founder details only when the client supplies/approves them.

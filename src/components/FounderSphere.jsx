@@ -2,87 +2,53 @@ import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { founders } from "../content.js";
 
-function createFounderTexture(THREE, founder, index) {
+function createFiligreeTexture(THREE) {
   const canvas = document.createElement("canvas");
-  canvas.width = 640;
-  canvas.height = 640;
+  canvas.width = 1024;
+  canvas.height = 512;
   const context = canvas.getContext("2d");
-  const center = 320;
+  const field = context.createLinearGradient(0, 0, 1024, 512);
+  field.addColorStop(0, "#39352f");
+  field.addColorStop(0.48, "#4a3e2e");
+  field.addColorStop(1, "#211e19");
+  context.fillStyle = field;
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
-  const background = context.createRadialGradient(center, center, 28, center, center, 330);
-  background.addColorStop(0, "#292621");
-  background.addColorStop(0.64, "#191816");
-  background.addColorStop(1, "#10100f");
-  context.fillStyle = background;
-  context.fillRect(0, 0, 640, 640);
-
-  context.save();
-  context.beginPath();
-  context.arc(center, center, 304, 0, Math.PI * 2);
-  context.clip();
-  context.translate(center, center);
-  context.rotate(index * 0.19);
-  context.strokeStyle = "rgba(197, 168, 128, 0.23)";
-  context.lineWidth = 1;
-  for (let radius = 82; radius <= 286; radius += 34) {
+  context.strokeStyle = "rgba(245, 222, 184, 0.25)";
+  context.lineWidth = 1.1;
+  for (let row = 0; row < 10; row += 1) {
+    const y = 22 + row * 52;
     context.beginPath();
-    context.arc(0, 0, radius, 0, Math.PI * 2);
+    context.moveTo(0, y);
+    context.bezierCurveTo(240, y - 34, 480, y + 31, 720, y - 8);
+    context.bezierCurveTo(850, y - 22, 930, y + 15, 1024, y - 2);
     context.stroke();
   }
-  for (let ray = 0; ray < 16; ray += 1) {
-    const angle = (Math.PI * 2 * ray) / 16;
+  context.strokeStyle = "rgba(245, 243, 239, 0.11)";
+  for (let column = -4; column < 14; column += 1) {
     context.beginPath();
-    context.moveTo(Math.cos(angle) * 82, Math.sin(angle) * 82);
-    context.lineTo(Math.cos(angle) * 304, Math.sin(angle) * 304);
+    context.ellipse(column * 86 + 35, 256, 70, 285, 0, 0, Math.PI * 2);
     context.stroke();
   }
-  context.restore();
-
+  context.strokeStyle = "rgba(226, 195, 146, 0.6)";
+  context.lineWidth = 2;
   context.beginPath();
-  context.arc(center, center, 306, 0, Math.PI * 2);
-  context.strokeStyle = "rgba(197, 168, 128, 0.82)";
-  context.lineWidth = 3;
+  context.moveTo(0, 256);
+  context.lineTo(420, 256);
+  context.lineTo(515, 151);
+  context.lineTo(1024, 151);
   context.stroke();
-  context.beginPath();
-  context.arc(center, center, 288, 0, Math.PI * 2);
-  context.strokeStyle = "rgba(245, 243, 239, 0.24)";
-  context.lineWidth = 1;
-  context.stroke();
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillStyle = "rgba(197, 168, 128, 0.96)";
-  context.font = "500 23px Outfit, Arial, sans-serif";
-  context.fillText("FOUNDER  /  " + founder.index, center, 214);
-
-  context.fillStyle = "rgba(245, 243, 239, 0.94)";
-  context.font = "400 70px Georgia, 'Times New Roman', serif";
-  const labelLines = founder.placeholder
-    ? ["Founder " + founder.index, "Name to be added"]
-    : ["Vijay", "Williams"];
-  context.fillText(labelLines[0], center, 304);
-  context.fillText(labelLines[1], center, 386);
-
-  context.fillStyle = "rgba(197, 168, 128, 0.72)";
-  context.font = "500 19px Outfit, Arial, sans-serif";
-  context.fillText("PINNACLE  /  DESIGN STUDIO", center, 475);
+  context.fillStyle = "rgba(245, 243, 239, 0.72)";
+  [[420, 256], [515, 151], [760, 151]].forEach(([x, y]) => {
+    context.beginPath();
+    context.arc(x, y, 3, 0, Math.PI * 2);
+    context.fill();
+  });
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
-  texture.anisotropy = 4;
+  texture.anisotropy = 8;
   return texture;
-}
-
-function nearestFounderIndex(nodes) {
-  let index = 0;
-  let depth = -Infinity;
-  nodes.forEach((node, currentIndex) => {
-    if (node.position.z > depth) {
-      depth = node.position.z;
-      index = currentIndex;
-    }
-  });
-  return index;
 }
 
 export default function FounderSphere() {
@@ -91,6 +57,7 @@ export default function FounderSphere() {
   const sceneApi = useRef(null);
   const captionRef = useRef(null);
   const controlsRef = useRef(null);
+  const activeIndexRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(null);
   const [webglFailed, setWebglFailed] = useState(false);
 
@@ -110,109 +77,139 @@ export default function FounderSphere() {
         if (disposed) return;
 
         const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 80);
-        camera.position.set(0, 0, 7.2);
+        scene.background = null;
+        scene.fog = new THREE.FogExp2(0x121212, 0.022);
+        const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 80);
+        camera.position.set(0, 0, 7.65);
+
         const renderer = new THREE.WebGLRenderer({
           canvas,
           alpha: true,
           antialias: true,
           powerPreference: "low-power",
         });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.7));
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.65));
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.setClearColor(0x000000, 0);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.04;
+        renderer.setClearColor(0x121212, 0);
+
+        scene.add(new THREE.AmbientLight(0xf5f3ef, 1.12));
+        const keyLight = new THREE.DirectionalLight(0xc5a880, 2.2);
+        keyLight.position.set(-3.2, 4.1, 5.4);
+        scene.add(keyLight);
+        const fillLight = new THREE.PointLight(0xf5f3ef, 1.35, 11);
+        fillLight.position.set(3.4, -1.6, 3.6);
+        scene.add(fillLight);
+        const rimLight = new THREE.PointLight(0x60746c, 1.2, 13);
+        rimLight.position.set(-4.2, -2.2, -3.4);
+        scene.add(rimLight);
 
         const field = new THREE.Group();
         scene.add(field);
         const globe = new THREE.Group();
         field.add(globe);
 
+        const geometries = [];
+        const materials = [];
+        const textures = [];
+        const orbitGeometry = new THREE.TorusGeometry(2.03, 0.005, 6, 220);
         const orbitMaterial = new THREE.MeshBasicMaterial({
           color: 0xc5a880,
           transparent: true,
-          opacity: 0.28,
-          wireframe: false,
+          opacity: 0.2,
           depthWrite: false,
         });
-        const orbitMaterialSoft = orbitMaterial.clone();
-        orbitMaterialSoft.opacity = 0.12;
-        const orbitGeometry = new THREE.TorusGeometry(2.05, 0.006, 6, 180);
+        const orbitMaterialFine = orbitMaterial.clone();
+        orbitMaterialFine.opacity = 0.09;
+        geometries.push(orbitGeometry);
+        materials.push(orbitMaterial, orbitMaterialFine);
         [0, Math.PI / 3, -Math.PI / 3].forEach((angle, index) => {
-          const ring = new THREE.Mesh(orbitGeometry, index === 1 ? orbitMaterialSoft : orbitMaterial);
+          const ring = new THREE.Mesh(orbitGeometry, index === 1 ? orbitMaterialFine : orbitMaterial);
           ring.rotation.x = Math.PI / 2 + angle;
           globe.add(ring);
         });
 
-        const coreGeometry = new THREE.IcosahedronGeometry(0.79, 2);
+        const coreGeometry = new THREE.IcosahedronGeometry(0.9, 2);
         const coreEdges = new THREE.EdgesGeometry(coreGeometry);
-        const core = new THREE.LineSegments(
+        const coreMaterial = new THREE.MeshPhysicalMaterial({
+          color: 0x28241e,
+          metalness: 0.64,
+          roughness: 0.33,
+          clearcoat: 0.8,
+          clearcoatRoughness: 0.24,
+          emissive: 0x130f09,
+          emissiveIntensity: 0.22,
+        });
+        const core = new THREE.Mesh(coreGeometry, coreMaterial);
+        const coreWire = new THREE.LineSegments(
           coreEdges,
-          new THREE.LineBasicMaterial({
-            color: 0xc5a880,
-            transparent: true,
-            opacity: 0.23,
-            depthWrite: false,
-          }),
+          new THREE.LineBasicMaterial({ color: 0xc5a880, transparent: true, opacity: 0.27, depthWrite: false }),
         );
-        globe.add(core);
+        globe.add(core, coreWire);
+        geometries.push(coreGeometry, coreEdges);
+        materials.push(coreMaterial, coreWire.material);
 
-        const centerMark = new THREE.Mesh(
-          new THREE.OctahedronGeometry(0.19, 0),
-          new THREE.MeshBasicMaterial({ color: 0xc5a880, transparent: true, opacity: 0.76 }),
-        );
-        globe.add(centerMark);
+        const nodeRadius = 0.46;
+        const nodeGeometry = new THREE.SphereGeometry(nodeRadius, 48, 32);
+        const wireGeometry = new THREE.SphereGeometry(nodeRadius * 1.008, 26, 18);
+        const bandGeometry = new THREE.TorusGeometry(nodeRadius * 1.04, 0.006, 8, 96);
+        const filigree = createFiligreeTexture(THREE);
+        textures.push(filigree);
+        const nodeMaterial = new THREE.MeshPhysicalMaterial({
+          map: filigree,
+          color: 0xe8d6b9,
+          metalness: 0.27,
+          roughness: 0.25,
+          clearcoat: 0.96,
+          clearcoatRoughness: 0.12,
+          emissive: 0x342515,
+          emissiveMap: filigree,
+          emissiveIntensity: 0.18,
+        });
+        const wireMaterial = new THREE.MeshBasicMaterial({
+          color: 0xf0dcb8,
+          wireframe: true,
+          transparent: true,
+          opacity: 0.065,
+          depthWrite: false,
+        });
+        const bandMaterial = new THREE.MeshBasicMaterial({
+          color: 0xc5a880,
+          transparent: true,
+          opacity: 0.7,
+          depthWrite: false,
+        });
+        geometries.push(nodeGeometry, wireGeometry, bandGeometry);
+        materials.push(nodeMaterial, wireMaterial, bandMaterial);
 
         const nodes = [];
-        const textures = [];
-        const geometries = [orbitGeometry, coreGeometry, coreEdges];
-        const materials = [orbitMaterial, orbitMaterialSoft, core.material, centerMark.material];
-        const sharedDisc = new THREE.CircleGeometry(0.68, 96);
-        const sharedRim = new THREE.RingGeometry(0.69, 0.715, 96);
-        geometries.push(sharedDisc, sharedRim);
-
         founders.forEach((founder, index) => {
-          const angle = (Math.PI * 2 * index) / founders.length;
+          const y = 1 - (2 * (index + 0.5)) / founders.length;
+          const radial = Math.sqrt(1 - y * y);
+          const theta = index * Math.PI * (3 - Math.sqrt(5));
           const position = new THREE.Vector3(
-            1.76 * Math.sin(angle),
-            0.34 * Math.sin(angle * 2),
-            1.76 * Math.cos(angle),
+            1.66 * radial * Math.cos(theta),
+            1.66 * y,
+            1.66 * radial * Math.sin(theta),
           );
-          const normal = position.clone().normalize();
           const bubble = new THREE.Group();
           bubble.position.copy(position);
-          bubble.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
+          bubble.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), position.clone().normalize());
 
-          const texture = createFounderTexture(THREE, founder, index);
-          textures.push(texture);
-          const discMaterial = new THREE.MeshBasicMaterial({
-            map: texture,
-            transparent: true,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-            opacity: 0.92,
-          });
-          const disc = new THREE.Mesh(sharedDisc, discMaterial);
-          disc.userData.founderIndex = index;
-          bubble.add(disc);
-
-          const rimMaterial = new THREE.MeshBasicMaterial({
-            color: 0xc5a880,
-            transparent: true,
-            opacity: 0.9,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-          });
-          const rim = new THREE.Mesh(sharedRim, rimMaterial);
-          rim.position.z = 0.012;
-          bubble.add(rim);
+          const orb = new THREE.Mesh(nodeGeometry, nodeMaterial);
+          orb.userData.founderIndex = index;
+          const wire = new THREE.Mesh(wireGeometry, wireMaterial);
+          const band = new THREE.Mesh(bandGeometry, bandMaterial);
+          band.rotation.x = Math.PI / 2.8;
+          bubble.add(orb, wire, band);
           globe.add(bubble);
-          nodes.push({ bubble, disc, rim, index, position });
-          materials.push(discMaterial, rimMaterial);
+          nodes.push({ bubble, orb, index, position, band });
         });
 
-        const starPositions = new Float32Array(260 * 3);
-        for (let i = 0; i < 260; i += 1) {
-          const radius = 2.6 + Math.random() * 1.6;
+        const starPositions = new Float32Array(320 * 3);
+        for (let i = 0; i < 320; i += 1) {
+          const radius = 2.55 + Math.random() * 2.25;
           const theta = Math.random() * Math.PI * 2;
           const phi = Math.acos(2 * Math.random() - 1);
           starPositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
@@ -222,8 +219,8 @@ export default function FounderSphere() {
         const starGeometry = new THREE.BufferGeometry();
         starGeometry.setAttribute("position", new THREE.BufferAttribute(starPositions, 3));
         const starMaterial = new THREE.PointsMaterial({
-          color: 0xd0b892,
-          size: 0.014,
+          color: 0xc5a880,
+          size: 0.012,
           transparent: true,
           opacity: 0.52,
           depthWrite: false,
@@ -249,6 +246,7 @@ export default function FounderSphere() {
           const height = Math.max(1, stage.clientHeight);
           renderer.setSize(width, height, false);
           camera.aspect = width / height;
+          camera.position.z = width < 520 ? 8.7 : width < 850 ? 8.1 : 7.65;
           camera.updateProjectionMatrix();
         };
         const resizeObserver = new ResizeObserver(resize);
@@ -272,6 +270,7 @@ export default function FounderSphere() {
         const announceFocus = (index) => {
           if (index === lastFocus) return;
           lastFocus = index;
+          activeIndexRef.current = index;
           setActiveIndex(index);
         };
 
@@ -284,6 +283,7 @@ export default function FounderSphere() {
           if (reducedMotion) {
             globe.rotation.y = target;
             globe.rotation.x = 0;
+            globe.rotation.z = 0;
             announceFocus(index);
             globe.updateMatrixWorld(true);
             renderer.render(scene, camera);
@@ -291,7 +291,9 @@ export default function FounderSphere() {
           }
           gsap.to(globe.rotation, {
             y: target,
-            duration: 0.95,
+            x: 0,
+            z: 0,
+            duration: 1.08,
             ease: "expo.out",
             onUpdate: () => announceFocus(index),
             onComplete: () => announceFocus(index),
@@ -310,7 +312,7 @@ export default function FounderSphere() {
           pointer.x = ((event.clientX - bounds.left) / bounds.width) * 2 - 1;
           pointer.y = -((event.clientY - bounds.top) / bounds.height) * 2 + 1;
           raycaster.setFromCamera(pointer, camera);
-          const hit = raycaster.intersectObjects(nodes.map((node) => node.disc), false)[0];
+          const hit = raycaster.intersectObjects(nodes.map((node) => node.orb), false)[0];
           return hit?.object?.userData?.founderIndex;
         };
 
@@ -358,7 +360,7 @@ export default function FounderSphere() {
           if (didMove) {
             hasInteracted = true;
             const focusIndex = nearestToCamera();
-            setActiveIndex(focusIndex);
+            announceFocus(focusIndex);
             if (reducedMotion) {
               snapTo(focusIndex);
               return;
@@ -366,7 +368,7 @@ export default function FounderSphere() {
             gsap.to(globe.rotation, {
               y: globe.rotation.y + velocityX * 12,
               x: THREE.MathUtils.clamp(globe.rotation.x + velocityY * 10, -0.28, 0.28),
-              duration: 0.48,
+              duration: 0.52,
               ease: "power2.out",
               onComplete: () => snapTo(),
             });
@@ -379,10 +381,10 @@ export default function FounderSphere() {
           event.preventDefault();
           hasInteracted = true;
           gsap.killTweensOf(globe.rotation);
-          globe.rotation.y += (event.deltaY + event.deltaX) * 0.00165;
+          globe.rotation.y += (event.deltaY + event.deltaX) * 0.00155;
           announceFocus(nearestToCamera());
           window.clearTimeout(snapTimer);
-          snapTimer = window.setTimeout(() => snapTo(), 170);
+          snapTimer = window.setTimeout(() => snapTo(), 180);
         };
 
         const onVisibility = () => {
@@ -396,42 +398,34 @@ export default function FounderSphere() {
         canvas.addEventListener("wheel", onWheel, { passive: false });
         document.addEventListener("visibilitychange", onVisibility);
 
-        let lastTime = performance.now();
         const render = (now) => {
           frame = window.requestAnimationFrame(render);
           if (!visible) return;
-          const elapsed = Math.min(32, now - lastTime);
-          lastTime = now;
           if (!reducedMotion && !hasInteracted && !drag && !gsap.isTweening(globe.rotation)) {
-            globe.rotation.y += elapsed * 0.00012;
-            globe.rotation.z = Math.sin(now * 0.00016) * 0.018;
-            core.rotation.y += elapsed * 0.00014;
-            stars.rotation.y -= elapsed * 0.000008;
+            globe.rotation.y += 0.00012 * Math.min(32, now - (render.lastTime || now));
+            globe.rotation.z = Math.sin(now * 0.00015) * 0.012;
+            core.rotation.y += 0.00014 * Math.min(32, now - (render.lastTime || now));
+            stars.rotation.y -= 0.000008 * Math.min(32, now - (render.lastTime || now));
           }
+          render.lastTime = now;
           globe.updateMatrixWorld(true);
-          const cameraVector = new THREE.Vector3();
           nodes.forEach((node) => {
-            node.bubble.getWorldPosition(cameraVector);
-            const depth = THREE.MathUtils.clamp((cameraVector.z + 1.6) / 3.2, 0.25, 1.12);
-            node.bubble.scale.setScalar(0.77 + depth * 0.25);
-            node.rim.material.opacity = 0.3 + depth * 0.6;
+            node.bubble.rotation.z = Math.sin(now * 0.00034 + node.index * 1.7) * 0.03;
           });
-          if (hasInteracted && now - lastFocusTime > 130) {
-            lastFocusTime = now;
-            announceFocus(nearestToCamera());
-          }
           renderer.render(scene, camera);
         };
         frame = window.requestAnimationFrame(render);
         if (!reducedMotion) globe.rotation.y = -0.34;
+        stage.classList.add("is-ready");
 
         sceneApi.current = {
           focus,
           step: (direction) => {
-            const current = lastFocus < 0 ? 0 : lastFocus;
+            const current = activeIndexRef.current ?? 0;
             focus((current + direction + founders.length) % founders.length);
           },
         };
+        if (activeIndexRef.current !== null) focus(activeIndexRef.current);
 
         destroyScene = () => {
           window.cancelAnimationFrame(frame);
@@ -444,6 +438,7 @@ export default function FounderSphere() {
           canvas.removeEventListener("wheel", onWheel);
           document.removeEventListener("visibilitychange", onVisibility);
           gsap.killTweensOf(globe.rotation);
+          stage.classList.remove("is-ready");
           geometries.forEach((geometry) => geometry.dispose());
           materials.forEach((material) => material.dispose());
           textures.forEach((texture) => texture.dispose());
@@ -463,7 +458,7 @@ export default function FounderSphere() {
           startScene();
         }
       },
-      { rootMargin: "260px 0px" },
+      { rootMargin: "300px 0px" },
     );
     observer.observe(stage);
 
@@ -480,22 +475,28 @@ export default function FounderSphere() {
     if (!caption || activeIndex === null || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     gsap.fromTo(
       caption,
-      { autoAlpha: 0, y: 15, filter: "blur(8px)" },
-      { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.48, ease: "power3.out" },
+      { autoAlpha: 0, y: 12, filter: "blur(5px)" },
+      { autoAlpha: 1, y: 0, filter: "blur(0px)", duration: 0.42, ease: "power3.out" },
     );
   }, [activeIndex]);
 
   const activeFounder = activeIndex === null ? null : founders[activeIndex];
   const focusFounder = (index) => {
+    activeIndexRef.current = index;
     setActiveIndex(index);
     sceneApi.current?.focus(index);
   };
   const onControlsKeyDown = (event) => {
-    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+    if (event.key !== "ArrowLeft" && event.key !== "ArrowRight" && event.key !== "Home" && event.key !== "End") return;
     const buttons = [...(controlsRef.current?.querySelectorAll("button") || [])];
     const focusedIndex = buttons.indexOf(document.activeElement);
-    const current = activeIndex ?? (focusedIndex >= 0 ? focusedIndex : 0);
-    const next = (current + (event.key === "ArrowRight" ? 1 : -1) + founders.length) % founders.length;
+    let next;
+    if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = founders.length - 1;
+    else {
+      const current = activeIndex ?? (focusedIndex >= 0 ? focusedIndex : 0);
+      next = (current + (event.key === "ArrowRight" ? 1 : -1) + founders.length) % founders.length;
+    }
     event.preventDefault();
     focusFounder(next);
     buttons[next]?.focus();
@@ -503,15 +504,17 @@ export default function FounderSphere() {
 
   return (
     <div className={`founder-experience${webglFailed ? " founder-experience--fallback" : ""}`}>
-      <div className="founder-orbit-stage" ref={stageRef} data-cursor="ROTATE">
-        <div className="founder-orbit-stage__halo" aria-hidden="true" />
-        <div className="founder-orbit-stage__crosshair" aria-hidden="true"><span /><span /></div>
-        <canvas className="founder-orbit-canvas" ref={canvasRef} aria-hidden="true" />
+      <div
+        className="founder-orbit-stage"
+        ref={stageRef}
+        role="group"
+        aria-label="Interactive orbit of the five founders"
+        aria-describedby="founder-orbit-note"
+      >
         <div className="founder-orbit-stage__fallback" aria-hidden="true">
-          <span /><span /><span /><span /><i>05</i>
+          <span /><span /><span /><span /><span />
         </div>
-        <span className="founder-orbit-stage__axis founder-orbit-stage__axis--left" aria-hidden="true">01 — 05 / ORBITAL INDEX</span>
-        <span className="founder-orbit-stage__axis founder-orbit-stage__axis--right" aria-hidden="true">P / 05</span>
+        <canvas className="founder-orbit-canvas" ref={canvasRef} aria-hidden="true" />
       </div>
 
       <div className="founder-orbit-caption" ref={captionRef} aria-live="polite" aria-atomic="true">
@@ -524,7 +527,7 @@ export default function FounderSphere() {
         )}
       </div>
 
-      <div className="founder-orbit-controls" ref={controlsRef} role="group" aria-label="Select a founder in the interactive sphere" onKeyDown={onControlsKeyDown} data-cursor="SELECT">
+      <div className="founder-orbit-controls" ref={controlsRef} role="group" aria-label="Select a founder in the interactive sphere" onKeyDown={onControlsKeyDown}>
         {founders.map((founder, index) => (
           <button
             className={`founder-orbit-control${activeIndex === index ? " is-active" : ""}`}
@@ -540,7 +543,7 @@ export default function FounderSphere() {
         ))}
       </div>
 
-      <p className="founder-orbit-note">Drag or scroll the sphere to explore the leadership team steering our spatial architecture.</p>
+      <p className="founder-orbit-note" id="founder-orbit-note">Drag or scroll the sphere to explore the leadership team steering our spatial architecture.</p>
     </div>
   );
 }

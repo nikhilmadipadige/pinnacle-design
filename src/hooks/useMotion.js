@@ -6,16 +6,16 @@ import Lenis from "lenis";
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-function animateCounter(element, gsapContext) {
+function animateCounter(element, context) {
   const original = element.textContent.trim();
   const value = Number.parseInt(original.replace(/\D/g, ""), 10);
   if (!Number.isFinite(value)) return;
   const suffix = original.replace(/[\d,]/g, "");
   const counter = { value: 0 };
   element.textContent = `0${suffix}`;
-  gsapContext.to(counter, {
+  context.to(counter, {
     value,
-    duration: 1.65,
+    duration: 1.5,
     ease: "power2.out",
     onUpdate: () => {
       element.textContent = `${Math.round(counter.value).toLocaleString()}${suffix}`;
@@ -30,9 +30,10 @@ export default function useMotion(rootRef) {
     if (!root) return undefined;
 
     const lenis = new Lenis({
-      duration: 1.12,
+      lerp: 0.075,
       smoothWheel: true,
       syncTouch: false,
+      wheelMultiplier: 0.9,
       anchors: { offset: -82 },
       respectReducedMotion: true,
     });
@@ -45,30 +46,44 @@ export default function useMotion(rootRef) {
     const media = gsap.matchMedia(root);
     const context = gsap.context(() => {
       media.add("(prefers-reduced-motion: no-preference)", () => {
+        const splits = [];
         const titleLines = root.querySelectorAll(".hero__title-line");
-        const split = titleLines.length
+        const heroSplit = titleLines.length
           ? new SplitText(titleLines, { type: "chars", charsClass: "hero-char" })
           : null;
+        if (heroSplit) splits.push(heroSplit);
 
-        const opening = gsap.timeline({ delay: 0.12, defaults: { ease: "power4.out" } });
+        const opening = gsap.timeline({ delay: 0.08, defaults: { ease: "power4.out" } });
         opening
-          .fromTo(".hero__eyebrow", { y: 20, autoAlpha: 0, letterSpacing: "0.42em" }, { y: 0, autoAlpha: 1, letterSpacing: "0.26em", duration: 0.74 })
-          .fromTo(split?.chars || ".hero__title-line", { yPercent: 128, rotateX: -72, filter: "blur(12px)", autoAlpha: 0 }, { yPercent: 0, rotateX: 0, filter: "blur(0px)", autoAlpha: 1, duration: 1.08, stagger: { each: 0.021, from: "start" }, ease: "expo.out" }, "-=0.38")
-          .fromTo(".hero__description", { y: 28, autoAlpha: 0, filter: "blur(6px)" }, { y: 0, autoAlpha: 1, filter: "blur(0px)", duration: 0.76 }, "-=0.58")
-          .fromTo(".hero__actions .button", { y: 20, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.62, stagger: 0.11 }, "-=0.48")
-          .fromTo(".hero-art__frame", { clipPath: "inset(14% 0 14% 24%)", scale: 1.12, autoAlpha: 0.5 }, { clipPath: "inset(0% 0 0% 0%)", scale: 1, autoAlpha: 1, duration: 1.35, ease: "power3.inOut" }, "-=1.05")
-          .fromTo(".hero-art__caption, .hero__bottom", { y: 18, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.6, stagger: 0.08 }, "-=0.55");
+          .fromTo(".hero__eyebrow", { y: 18, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.65 })
+          .fromTo(
+            heroSplit?.chars || ".hero__title-line",
+            { yPercent: 116, rotateX: -55, autoAlpha: 0 },
+            { yPercent: 0, rotateX: 0, autoAlpha: 1, duration: 0.92, stagger: { each: 0.024, from: "start" }, ease: "expo.out" },
+            "-=0.25",
+          )
+          .fromTo(".hero__description", { y: 22, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.62 }, "-=0.4")
+          .fromTo(".hero__actions .button", { y: 14, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.55, stagger: 0.1 }, "-=0.32")
+          .fromTo(".hero-art__frame", { clipPath: "inset(10% 0 10% 14%)", scale: 1.08, autoAlpha: 0.7 }, { clipPath: "inset(0% 0% 0% 0%)", scale: 1, autoAlpha: 1, duration: 1.12, ease: "power3.inOut" }, "-=0.96")
+          .fromTo(".hero-art__caption, .hero__bottom", { y: 15, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.55, stagger: 0.08 }, "-=0.42");
+
+        gsap.to(".hero-art__datum", {
+          scaleX: 1,
+          transformOrigin: "left center",
+          duration: 0.85,
+          ease: "power3.out",
+          delay: 0.95,
+        });
 
         gsap.utils.toArray(".reveal", root).forEach((element, index) => {
           gsap.fromTo(
             element,
-            { y: 36, autoAlpha: 0, filter: "blur(7px)" },
+            { y: 32, autoAlpha: 0 },
             {
               y: 0,
               autoAlpha: 1,
-              filter: "blur(0px)",
-              duration: 0.92,
-              delay: Math.min(index % 3, 2) * 0.045,
+              duration: 0.82,
+              delay: Math.min(index % 3, 2) * 0.055,
               ease: "power3.out",
               scrollTrigger: { trigger: element, start: "top 86%", once: true },
             },
@@ -77,49 +92,106 @@ export default function useMotion(rootRef) {
 
         gsap.utils.toArray(".stat strong", root).forEach((element) => animateCounter(element, gsap));
 
-        gsap.to(".hero__glow", {
-          yPercent: 25,
-          xPercent: -7,
-          scale: 1.18,
-          ease: "none",
-          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.8 },
-        });
-        gsap.to(".hero-art__frame img", {
-          yPercent: 9,
-          scale: 1.1,
-          ease: "none",
-          scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.8 },
-        });
+        const heroImage = root.querySelector(".hero-art__frame img");
+        if (heroImage) {
+          gsap.to(heroImage, {
+            yPercent: 7,
+            scale: 1.09,
+            ease: "none",
+            scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: 0.9 },
+          });
+        }
 
-        gsap.utils.toArray(".philosophy__image-wrap", root).forEach((image) => {
+        const philosophyImage = root.querySelector(".philosophy__image-wrap");
+        if (philosophyImage) {
           gsap.fromTo(
-            image,
-            { clipPath: "inset(12% 0 12% 14%)" },
+            philosophyImage,
+            { clipPath: "inset(12% 0 8% 14%)" },
             {
-              clipPath: "inset(0% 0 0% 0%)",
+              clipPath: "inset(0% 0% 0% 0%)",
               ease: "none",
-              scrollTrigger: { trigger: image, start: "top 84%", end: "center 52%", scrub: 0.8 },
+              scrollTrigger: { trigger: philosophyImage, start: "top 86%", end: "center 52%", scrub: 0.8 },
             },
           );
-          const photo = image.querySelector("img");
-          if (photo) {
-            gsap.fromTo(photo, { scale: 1.16 }, {
+          const image = philosophyImage.querySelector("img");
+          if (image) {
+            gsap.fromTo(image, { scale: 1.15 }, {
               scale: 1,
               ease: "none",
-              scrollTrigger: { trigger: image, start: "top bottom", end: "bottom top", scrub: 1 },
+              scrollTrigger: { trigger: philosophyImage, start: "top bottom", end: "bottom top", scrub: 1 },
             });
           }
+        }
+
+        const projectPanels = gsap.utils.toArray(".portfolio-panel", root);
+        const progressFill = root.querySelector(".portfolio__progress-fill");
+        const currentProject = root.querySelector(".portfolio__progress-current");
+        const setProjectProgress = (index) => {
+          if (currentProject) currentProject.textContent = `0${index + 1}`;
+          if (progressFill) gsap.to(progressFill, { scaleX: (index + 1) / projectPanels.length, duration: 0.42, ease: "power2.out", overwrite: true });
+        };
+        setProjectProgress(0);
+
+        projectPanels.forEach((panel, index) => {
+          const imageFrame = panel.querySelector(".portfolio-panel__image");
+          const image = panel.querySelector(".portfolio-panel__image img");
+          const copy = panel.querySelector(".portfolio-panel__copy");
+          const offset = index % 2 ? -46 : 46;
+          if (imageFrame) {
+            gsap.fromTo(
+              imageFrame,
+              { clipPath: index % 2 ? "inset(0 0 0 15%)" : "inset(0 15% 0 0)" },
+              {
+                clipPath: "inset(0% 0% 0% 0%)",
+                ease: "none",
+                scrollTrigger: { trigger: panel, start: "top 82%", end: "top 42%", scrub: 0.75 },
+              },
+            );
+          }
+          if (image) {
+            gsap.fromTo(image, { scale: 1.13 }, {
+              scale: 1,
+              ease: "none",
+              scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: 1 },
+            });
+            gsap.fromTo(image, { yPercent: index % 2 ? 6 : -6 }, {
+              yPercent: 0,
+              ease: "none",
+              scrollTrigger: { trigger: panel, start: "top bottom", end: "bottom top", scrub: 1.25 },
+            });
+          }
+          if (copy) {
+            gsap.fromTo(
+              copy,
+              { x: offset, y: 14, autoAlpha: 0 },
+              {
+                x: 0,
+                y: 0,
+                autoAlpha: 1,
+                duration: 0.82,
+                ease: "power3.out",
+                scrollTrigger: { trigger: panel, start: "top 76%", once: true },
+              },
+            );
+          }
+          ScrollTrigger.create({
+            trigger: panel,
+            start: "top center",
+            end: "bottom center",
+            onEnter: () => setProjectProgress(index),
+            onEnterBack: () => setProjectProgress(index),
+          });
         });
 
         gsap.utils.toArray(".discipline", root).forEach((row, index) => {
           gsap.fromTo(
             row,
-            { x: index % 2 ? 42 : -42, autoAlpha: 0, clipPath: "inset(0 8% 0 8%)" },
+            { x: index % 2 ? 28 : -28, autoAlpha: 0, clipPath: index % 2 ? "inset(0 0 0 7%)" : "inset(0 7% 0 0)" },
             {
               x: 0,
               autoAlpha: 1,
-              clipPath: "inset(0 0% 0 0%)",
-              duration: 0.8,
+              clipPath: "inset(0% 0% 0% 0%)",
+              duration: 0.78,
               ease: "power3.out",
               scrollTrigger: { trigger: row, start: "top 88%", once: true },
             },
@@ -129,145 +201,42 @@ export default function useMotion(rootRef) {
         const founderHeading = root.querySelector(".founders__head h2");
         if (founderHeading) {
           const headingSplit = new SplitText(founderHeading, { type: "words", wordsClass: "founder-heading-word" });
+          splits.push(headingSplit);
           gsap.fromTo(
             headingSplit.words,
-            { yPercent: 110, rotateX: -40, autoAlpha: 0 },
+            { yPercent: 105, rotateX: -35, autoAlpha: 0 },
             {
               yPercent: 0,
               rotateX: 0,
               autoAlpha: 1,
-              duration: 0.8,
-              stagger: 0.08,
+              duration: 0.72,
+              stagger: 0.075,
               ease: "power3.out",
               scrollTrigger: { trigger: founderHeading, start: "top 82%", once: true },
             },
           );
         }
 
-        const gallery = root.querySelector(".portfolio--kinetic");
-        const stage = root.querySelector(".portfolio__stage");
-        const viewport = root.querySelector(".portfolio__viewport");
-        const track = root.querySelector(".portfolio__track");
-        if (gallery && stage && viewport && track) {
-          const panels = gsap.utils.toArray(".portfolio-panel", track);
-          const fill = root.querySelector(".portfolio__progress-fill");
-          const current = root.querySelector(".portfolio__progress-current");
-          const travel = () => Math.max(0, track.scrollWidth - viewport.clientWidth);
-          const horizontal = gsap.to(track, {
-            x: () => -travel(),
-            ease: "none",
-            scrollTrigger: {
-              trigger: gallery,
-              start: "top top+=82",
-              end: () => `+=${Math.max(travel(), window.innerHeight * 0.8)}`,
-              pin: stage,
-              pinSpacing: true,
-              scrub: 0.9,
-              anticipatePin: 1,
-              invalidateOnRefresh: true,
-              onUpdate: (self) => {
-                if (fill) gsap.set(fill, { scaleX: Math.max(0.08, self.progress) });
-                if (current && panels.length) {
-                  const index = Math.min(panels.length - 1, Math.floor(self.progress * panels.length));
-                  current.textContent = `0${index + 1}`;
-                }
-              },
+        const orbitStage = root.querySelector(".founder-orbit-stage");
+        if (orbitStage) {
+          gsap.fromTo(
+            orbitStage,
+            { y: 38, scale: 0.94, autoAlpha: 0 },
+            {
+              y: 0,
+              scale: 1,
+              autoAlpha: 1,
+              duration: 1.1,
+              ease: "power3.out",
+              scrollTrigger: { trigger: orbitStage, start: "top 86%", once: true },
             },
-          });
-          panels.forEach((panel) => {
-            const image = panel.querySelector(".portfolio-panel__image img");
-            if (!image) return;
-            gsap.fromTo(
-              image,
-              { scale: 1.13 },
-              {
-                scale: 1,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: panel,
-                  containerAnimation: horizontal,
-                  start: "left right",
-                  end: "right left",
-                  scrub: true,
-                },
-              },
-            );
-          });
+          );
         }
 
-        return () => split?.revert();
+        return () => splits.forEach((split) => split.revert());
       });
 
-      media.add("(max-width: 760px)", () => {
-        const viewport = root.querySelector(".portfolio__viewport");
-        const panels = gsap.utils.toArray(".portfolio-panel", root);
-        const fill = root.querySelector(".portfolio__progress-fill");
-        const current = root.querySelector(".portfolio__progress-current");
-        if (!viewport || !panels.length) return undefined;
-        let frame = 0;
-        const updateMobileProgress = () => {
-          window.cancelAnimationFrame(frame);
-          frame = window.requestAnimationFrame(() => {
-            const max = Math.max(1, viewport.scrollWidth - viewport.clientWidth);
-            const progress = viewport.scrollLeft / max;
-            if (fill) fill.style.transform = `scaleX(${Math.max(0.08, progress)})`;
-            const center = viewport.scrollLeft + viewport.clientWidth / 2;
-            const index = panels.reduce((closest, panel, panelIndex) => {
-              const distance = Math.abs(panel.offsetLeft + panel.offsetWidth / 2 - center);
-              return distance < closest.distance ? { index: panelIndex, distance } : closest;
-            }, { index: 0, distance: Infinity }).index;
-            if (current) current.textContent = `0${index + 1}`;
-          });
-        };
-        viewport.addEventListener("scroll", updateMobileProgress, { passive: true });
-        updateMobileProgress();
-        return () => {
-          window.cancelAnimationFrame(frame);
-          viewport.removeEventListener("scroll", updateMobileProgress);
-        };
-      });
-
-      media.add("(pointer: fine) and (prefers-reduced-motion: no-preference)", () => {
-        const lens = root.querySelector(".pointer-lens");
-        if (!lens) return undefined;
-        const label = lens.querySelector("span");
-        const xTo = gsap.quickTo(lens, "x", { duration: 0.22, ease: "power3.out" });
-        const yTo = gsap.quickTo(lens, "y", { duration: 0.22, ease: "power3.out" });
-        let activeTarget = null;
-        root.classList.add("has-pointer-lens");
-        const move = (event) => {
-          xTo(event.clientX);
-          yTo(event.clientY);
-          lens.classList.add("is-visible");
-        };
-        const enterTarget = (event) => {
-          const target = event.target.closest?.("[data-cursor]");
-          if (!target || target === activeTarget) return;
-          activeTarget = target;
-          if (label) label.textContent = target.dataset.cursor || "VIEW";
-          lens.classList.add("is-active");
-        };
-        const leaveTarget = (event) => {
-          if (activeTarget && !activeTarget.contains(event.relatedTarget)) {
-            activeTarget = null;
-            lens.classList.remove("is-active");
-          }
-        };
-        const leaveRoot = () => lens.classList.remove("is-visible", "is-active");
-        root.addEventListener("pointermove", move);
-        root.addEventListener("pointerover", enterTarget);
-        root.addEventListener("pointerout", leaveTarget);
-        root.addEventListener("pointerleave", leaveRoot);
-        return () => {
-          root.classList.remove("has-pointer-lens");
-          root.removeEventListener("pointermove", move);
-          root.removeEventListener("pointerover", enterTarget);
-          root.removeEventListener("pointerout", leaveTarget);
-          root.removeEventListener("pointerleave", leaveRoot);
-        };
-      });
-
-      const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 180);
+      const refresh = window.setTimeout(() => ScrollTrigger.refresh(), 220);
       window.addEventListener("load", ScrollTrigger.refresh, { once: true });
       return () => {
         window.clearTimeout(refresh);
