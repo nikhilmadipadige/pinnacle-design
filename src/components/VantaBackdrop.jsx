@@ -42,12 +42,12 @@ export default function VantaBackdrop() {
           scaleMobile: 0.72,
           color: 0xc5a880,
           backgroundColor: 0x121212,
-          points: 8,
-          maxDistance: 27,
-          spacing: 23,
-          showDots: false,
-          mouseCoeffX: 0.48,
-          mouseCoeffY: 0.34,
+          points: 11,
+          maxDistance: 18,
+          spacing: 17,
+          showDots: true,
+          mouseCoeffX: 0.32,
+          mouseCoeffY: 0.24,
         });
         element.classList.add("vanta-backdrop--ready");
       } catch {

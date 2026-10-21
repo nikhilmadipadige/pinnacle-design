@@ -196,6 +196,19 @@ export default function useMotion(rootRef) {
               scrollTrigger: { trigger: row, start: "top 88%", once: true },
             },
           );
+          const drawingPaths = row.querySelectorAll(".discipline__drawing path:not(.discipline__drawing-guide), .discipline__drawing circle");
+          drawingPaths.forEach((path, pathIndex) => {
+            if (path.tagName.toLowerCase() === "circle") return;
+            const length = path.getTotalLength?.() || 0;
+            if (!length) return;
+            gsap.fromTo(path, { strokeDasharray: length, strokeDashoffset: length }, {
+              strokeDashoffset: 0,
+              duration: 0.7,
+              delay: pathIndex * 0.035,
+              ease: "power2.out",
+              scrollTrigger: { trigger: row, start: "top 76%", once: true },
+            });
+          });
         });
 
         const founderHeading = root.querySelector(".founders__head h2");
@@ -217,18 +230,19 @@ export default function useMotion(rootRef) {
           );
         }
 
-        const orbitStage = root.querySelector(".founder-orbit-stage");
-        if (orbitStage) {
+        const founderCards = gsap.utils.toArray(".founder-register__card", root);
+        if (founderCards.length) {
           gsap.fromTo(
-            orbitStage,
-            { y: 38, scale: 0.94, autoAlpha: 0 },
+            founderCards,
+            { y: 28, autoAlpha: 0, clipPath: "inset(0 0 10% 0)" },
             {
               y: 0,
-              scale: 1,
               autoAlpha: 1,
-              duration: 1.1,
+              clipPath: "inset(0 0 0% 0)",
+              duration: 0.82,
+              stagger: 0.075,
               ease: "power3.out",
-              scrollTrigger: { trigger: orbitStage, start: "top 86%", once: true },
+              scrollTrigger: { trigger: ".founder-register__grid", start: "top 82%", once: true },
             },
           );
         }

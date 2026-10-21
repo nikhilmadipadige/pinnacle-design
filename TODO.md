@@ -1,19 +1,17 @@
-# Revision acceptance
+# Current revision status
 
-| Area | Delivery status |
+| Outcome | Status |
 |---|---|
-| Locked copy, interior images, brand palette, and no-enquiry decision | Preserved; no founder role hierarchy or invented biographies |
-| Art direction | Recomposed as an architectural after-dark exhibition with an oversized hero aperture, consistent Pinnacle Datum, natural-scroll photo plates, open drawing-schedule disciplines, and spacious section rhythm |
-| GSAP and SplitText | Hero character choreography, hero image aperture, editorial reveals, project image masks/parallax, current-project tracking, statistic count-up, founder heading, and detail-dialog transition/close motion |
-| Lenis and ScrollTrigger | One vertical-scroll instance synchronized with ScrollTrigger; no pinned carousel or page-level wheel interception |
-| Vanta.js | Interactive, hero-only NET field, lazy loaded with restricted opacity/scope and reduced-motion/narrow-screen fallbacks |
-| Founders | Lazy Three.js bronze/glass sculpture, five same-size nodes, no preselection, one caption, drag/wheel and equal accessible controls |
-| Project dialog | Native cursor restored; close button, backdrop dismissal, and Escape supported by the native dialog interaction |
-| Responsive/accessibility | Verified 1280px desktop and true 390px mobile: no horizontal overflow, headline lines fit, five selector controls are equal-sized, Obsidian details close via the visible button, and the founders WebGL canvas initializes |
-| Build/security | Production build succeeds; `npm audit --omit=dev` reports zero vulnerabilities; `git diff --check` passes |
-| Source delivery | Committed and pushed to the selected GitHub `main` branch |
-| Vercel | Static build is configured, but the connected domain previously served the old bundle and no Vercel project binding/deployment record is visible in this session |
+| Preserve approved copy, project facts, current images, palette, logo, no-enquiry decision, and five equal founders | Preserved. No biographies, roles, or portraits invented. |
+| Founders section | Replaced the floating spheres with five aligned architectural register panels. Each panel has equal scale, its own abstract architectural study, the approved name or placeholder, and consistent selected/focus behavior. No default selection; click, arrow keys, Home and End work. |
+| Disciplines section | Rebuilt as three custom-illustrated architectural study cards. Increased the heading, description, and body type sizes; preserved all three approved descriptions. Wide screens use three columns, tablet uses an equal 2+1 composition, phones stack the cards. |
+| Hero background | Added low-contrast parametric contours and tuned the lazy Vanta NET layer toward shorter connections and softer opacity, keeping the photograph and headline prominent. |
+| Motion and accessibility | Retained GSAP/SplitText and Lenis/ScrollTrigger synchronization. Added a measured founder-panel stagger and discipline line-art reveals. Preserved natural scroll, keyboard focus, reduced-motion handling, and the visible native pointer in project dialogs. |
+| Responsive browser verification | Real Chromium checks at 1440px, 768px, and 390px: no mobile page overflow; five desktop founder cards match in width and height; five phone cards share the same dimensions; discipline illustrations/copy render at all sizes; keyboard selection works. |
+| Build/security | Production build passes. `npm audit --omit=dev` reports zero vulnerabilities. `git diff --check` passes. |
+| GitHub delivery | Pending final commit/push. |
+| Vercel | Static build configuration remains intact. Verify the public domain after push; earlier checks showed it serving an older bundle. |
 
-## Still pending client input
+## Awaiting client assets
 
-The final three project images and four approved founder names/details have not been supplied yet. Update `src/content.js` and `public/images/` only after receiving them.
+The final three project images and four approved founder names/details are still pending. Replace current media and labels only after they are supplied and approved.
