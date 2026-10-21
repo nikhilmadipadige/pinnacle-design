@@ -1,52 +1,48 @@
-# Pinnacle Design Studio Website — Build Plan
+# Pinnacle Design Studio — Kinetic Rebuild Plan
 
 ## Product and implementation
 
-Build a polished, responsive, single-page portfolio website for Pinnacle Design Studio from the empty connected repository. Preserve the sample's copy, core color palette, three existing project images, and selected-project details. The site is for people who already know the studio or its founders, so the work and collective identity should lead; the page is not a lead-generation funnel. Remove the inquiry/contact form section and inquiry navigation item for this phase. Do not create a replacement contact flow.
+Keep the existing approved copy, statistics, brand wordmark, palette, project descriptions, and three current interior photographs. This is a presentation redesign, not a content rewrite or lead-generation funnel: retain the no-enquiry decision, do not invent founder biographies/roles/portraits, and represent all five founders as equal peers. Vijay Williams is named; the other four remain editable placeholders. Use the next three client images when supplied.
 
-The founders section presents five equal peers. Show Vijay Williams by name and four explicitly editable placeholders. Do not use the sample's fictional founder names, titles, headshots, biographies, or specialties. Do not give any profile more scale, emphasis, or position than the others.
+Keep the static React + Vite app and Vercel deployment configuration. Use the existing libraries as deliberate parts of the experience: GSAP plus its official SplitText and ScrollTrigger plugins for typography, pinned sections, progress, and scroll choreography; Lenis for smooth scrolling synchronized with ScrollTrigger; Three.js for the founders' interactive 3D sphere; Vanta.js only for the hero's existing restrained atmospheric backdrop. Load the Three.js founders scene lazily when near the viewport and dispose its WebGL resources safely. Avoid adding libraries that duplicate these capabilities.
 
-Use a static React + Vite frontend with no server or database. The repository is intended for Vercel, so provide a Vite production build and `vercel.json` settings. Use the user's connected GitHub repository as the source of truth. Keep all browser paths relative, and do not embed private credentials.
+## Project structure
 
-GSAP with ScrollTrigger is the animation layer. Lenis may provide smooth scrolling, synchronized with ScrollTrigger and respecting reduced-motion settings. Vanta.js is limited to one restrained, optional hero atmospheric background with an accessible static fallback and cleanup. Motion is progressive enhancement: page content remains visible and usable if scripts or WebGL are unavailable.
-
-## Page and modules
-
-- `src/App.jsx`: page composition, existing content, navigation, project selection, founder peer section, and accessible project detail dialog.
-- `src/components/`: focused components for header, hero/ambient effect, portfolio, philosophy/discipline, founders, footer, and project detail dialog.
-- `src/data/siteContent.js`: approved copy, stats, projects and five founder entries; easy to update when the founders approve their details.
-- `src/hooks/`: GSAP/Lenis setup and optional Vanta lifecycle cleanup.
-- `src/styles.css`: design tokens, responsive layout, motion, focus, reduced-motion and fallback rules.
-- `public/images/`: supplied/current studio and project imagery, replaceable with the three forthcoming images.
-- `public/manus-routes.json`: route declaration for the one-page site.
-- `vercel.json`, `package.json`, and `index.html`: production build/deployment metadata.
+- `src/App.jsx`: existing page copy and composition, navigation, portfolio dialog, disciplines, founder experience mount.
+- `src/components/FounderSphere.jsx`: lazy Three.js scene, five identical geometric founder bubbles, mouse/touch orbit, scroll-wheel navigation, snap/inertia, and accessible equal-weight controls.
+- `src/components/VantaBackdrop.jsx`: optional hero atmosphere with static fallback.
+- `src/hooks/useMotion.js`: Lenis/ScrollTrigger synchronization, SplitText hero sequence, statistics count-up, parallax/image masks, pinned horizontal portfolio choreography, and section transitions.
+- `src/content.js`: all existing approved project/statistics/disciplines copy and the five editable founder labels.
+- `src/styles.css`: preserve the locked palette and typography while rebuilding the first impression, pinned project rail, and immersive founder stage for desktop/tablet/mobile.
+- `public/images/`: current replaceable project photographs and logo; do not present an interior image as a founder portrait.
+- `public/manus-routes.json`, `vercel.json`, `package.json`, and `index.html`: single-page routing, Vercel build, dependencies, and page metadata.
 
 ## Design direction
 
-**Movement:** refined luxury editorial with modernist architectural composition, grounded in the existing site rather than a new palette or brand rewrite.
+**Design movement:** cinematic kinetic editorialism crossed with architectural instrument design: the page should feel like moving through a designed space, not reading a conventional agency template.
 
-**Core principles:** (1) architecture-first composition, (2) warm restraint, (3) equal founder status, (4) motion that clarifies rather than competes.
+**Core principles:** (1) scale creates impact, (2) motion reveals spatial meaning, (3) all five founders share identical visual rules, (4) the original content and palette remain intact.
 
-**Color philosophy:** preserve the existing near-black `#121212`, charcoal `#191816`, bronze `#24221f`, cream `#f5f3ef`, and gold `#c5a880`. Maintain the sample's subtle blue-green atmospheric glow only as a restrained existing visual accent; do not introduce a new dominant hue.
+**Color philosophy:** retain `#121212` black, `#191816` charcoal, `#24221f` bronze, `#f5f3ef` cream, and `#c5a880` gold. Keep the sample's existing blue-green light bloom as an atmospheric accent, never as a new dominant color.
 
-**Layout paradigm:** editorial, asymmetric composition. A split hero joins typography and a large project image; portfolio projects receive deliberate, varying image scale; philosophy pairs a material image with its approved copy; five equal architectural planes form the signature founders' presentation. Reflow as a readable single column on mobile.
+**Layout paradigm:** an asymmetric editorial hero; a slow, image-led philosophy interlude; a GSAP-pinned horizontal project rail on desktop (native swipe/scroll stack on mobile); a large, full-width founders' orbit with a deep 3D field and five equally sized bubbles.
 
-**Signature elements:** a quiet geometric monogram/grid; a cinematic image reveal; a five-plane founders' composition with synchronized/mirrored reveal and equal dimensions.
+**Signature elements:** a split/revealing typographic hero; a horizontal project reel with a precise progress instrument; a five-node orbital sphere of abstract geometric bubbles, with equal rotation, sizing, and founder treatment.
 
-**Interaction philosophy:** use direct navigation and clear controls. Project cards open keyboard-accessible project details. Each founder is equally actionable; selection changes only the common detail area, never the selected founder's scale/rank. Mobile uses stacked profiles rather than a hidden carousel.
+**Interaction philosophy:** tactile and discoverable. Drag, wheel, touch, or arrow-key input rotates the founders sphere with momentum and equal snapping. The name in the shared caption changes using the same transition for every node. The bubbles use abstract geometry—not invented headshots. Portfolio projects move horizontally with page scroll on desktop and remain directly swipeable on touch devices. Keep native keyboard focus and reduced-motion alternatives.
 
-**Animation:** GSAP timelines for initial reveal, restrained ScrollTrigger reveals and image masks. Synchronize Lenis with ScrollTrigger if used. Vanta.js only behind the hero and disabled for reduced-motion/unavailable WebGL. Honor `prefers-reduced-motion`, avoid continuous movement, preserve native touch behavior and provide static content.
+**Animation:** Lenis runs the main scroll and calls `ScrollTrigger.update`; GSAP SplitText staggers hero characters into view; a pinned ScrollTrigger translates the project rail with live progress; images use clip-path and parallax reveals; counters animate only when entering view. Three.js animates the founders' geometry with subdued idle drift; user drag applies momentum, wheel and touch move through the orbit, and keyboard controls snap any founder to the same front position. Turn off nonessential autoplay under `prefers-reduced-motion`, keep content visible without animation, and avoid loading the 3D scene until it is near view.
 
-**Typography system:** preserve the existing Playfair Display editorial display face with Outfit for navigation, body copy, captions and controls. Use a restrained scale, generous line height, and consistent tracking for labels.
+**Typography system:** continue Playfair Display for display titles and Outfit for navigation, controls, body copy, and technical labels. Oversized titles are carefully clipped per line; captions remain short, tracked, and high contrast.
 
-**Brand essence:** a bespoke interior architecture studio for people who value considered spatial design; distinct through the balance of strict geometry and organic warmth. Personality: architectural, warm, composed.
+**Brand essence:** bespoke interior architecture for people who know the studio and its founders; architectural, tactile, and assured.
 
-**Brand voice:** retain the existing approved voice and wording. Existing examples: “YOUR DREAM, OUR CANVAS.” and “Every line has a purpose; every divider, shelf, and ceiling recess is calculated to direct flow and focus.” Do not invent new marketing copy.
+**Brand voice:** retain approved wording and tone; examples remain “YOUR DREAM, OUR CANVAS.” and “Every line has a purpose; every divider, shelf, and ceiling recess is calculated to direct flow and focus.”
 
-**Wordmark and mark:** keep the exact “PINNACLE / DESIGN STUDIO” name lockup; use a small geometric line mark drawn from the supplied Pinnacle logo, not a new brand name or alternate identity.
+**Wordmark and mark:** retain the existing PINNACLE / DESIGN STUDIO lock-up and geometric line symbol.
 
 **Signature brand color:** existing luxury gold `#c5a880`.
 
-## Delivery assumptions
+## Delivery constraints
 
-The three existing project images from the deployed sample are included as current assets so the page is complete for review; the three replacement images will be integrated when provided. Founder portraits and personal details are not available and will not be fabricated. Vercel deployment itself depends on the existing external project being linked to this GitHub repository; this repository receives the finished source and Vercel configuration, and a successful GitHub push alone does not prove deployment success.
+No founder portraits or personal details were supplied; the 3D node textures are abstract, not synthetic human likenesses. Keep the three current photos until the client sends the three replacement images. Repository push is not proof of a Vercel deployment; report deployment only if independently confirmed.

@@ -6,8 +6,9 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { disciplines, founders, projects, statistics } from "./content.js";
+import { disciplines, projects, statistics } from "./content.js";
 import VantaBackdrop from "./components/VantaBackdrop.jsx";
+import FounderSphere from "./components/FounderSphere.jsx";
 import useMotion from "./hooks/useMotion.js";
 
 const navItems = [
@@ -101,7 +102,7 @@ function Hero() {
           </div>
         </div>
 
-        <a className="hero-art" href="#gallery" aria-label="Explore Geometric Residential Lounge">
+        <a className="hero-art" href="#gallery" aria-label="Explore Geometric Residential Lounge" data-cursor="EXPLORE">
           <div className="hero-art__frame">
             <img
               src={projects[0].image}
@@ -203,22 +204,34 @@ function Philosophy() {
   );
 }
 
-function ProjectCard({ project, size, onOpen }) {
+function ProjectCard({ project, onOpen }) {
   return (
     <button
-      className={`project-card project-card--${size}`}
+      className="portfolio-panel"
       type="button"
       onClick={() => onOpen(project)}
+      data-cursor="VIEW"
       aria-label={`Open project details: ${project.title}`}
+      aria-haspopup="dialog"
     >
-      <img src={project.image} alt={project.alt} loading="lazy" />
-      <span className="project-card__veil" aria-hidden="true" />
-      <span className="project-card__index">{project.number} <i /> {project.subtitle}</span>
-      <span className="project-card__content">
-        <span className="project-card__title">{project.title}</span>
-        <span className="project-card__action" aria-hidden="true"><ArrowUpRight size={19} /></span>
+      <span className="portfolio-panel__image">
+        <img src={project.image} alt={project.alt} loading="lazy" />
+        <span className="portfolio-panel__index">{project.number} <i /> {project.subtitle}</span>
+        <span className="portfolio-panel__image-title">{project.title}</span>
+        <span className="portfolio-panel__frame" aria-hidden="true" />
       </span>
-      <span className="project-card__outline" aria-hidden="true" />
+      <span className="portfolio-panel__copy">
+        <span className="portfolio-panel__eyebrow">{project.subtitle}</span>
+        <span className="portfolio-panel__title">{project.title}</span>
+        <span className="portfolio-panel__description">{project.description}</span>
+        <span className="portfolio-panel__spec">
+          <span>{project.specs[0][0]}</span>
+          <b>{project.specs[0][1]}</b>
+        </span>
+        <span className="portfolio-panel__action">
+          Explore project details <ArrowUpRight size={18} strokeWidth={1.5} />
+        </span>
+      </span>
     </button>
   );
 }
@@ -280,9 +293,9 @@ function ProjectDialog({ project, onClose }) {
 function Portfolio() {
   const [selectedProject, setSelectedProject] = useState(null);
   return (
-    <section className="portfolio section-pad" id="gallery" aria-labelledby="portfolio-title">
-      <div className="page-wrap">
-        <div className="portfolio__head reveal">
+    <section className="portfolio portfolio--kinetic section-pad" id="gallery" aria-labelledby="portfolio-title">
+      <div className="portfolio__stage">
+        <div className="portfolio__head page-wrap reveal">
           <div>
             <SectionLabel number="02">Portfolio Highlights</SectionLabel>
             <h2 id="portfolio-title">Signature <em>Masterpieces</em></h2>
@@ -291,15 +304,22 @@ function Portfolio() {
             Interactive 3D rendering cards displaying key zones of our latest architectural projects. Click on any card to view detailed blueprints and material specifications.
           </p>
         </div>
-        <div className="portfolio__grid reveal">
-          <ProjectCard project={projects[0]} size="large" onOpen={setSelectedProject} />
-          <ProjectCard project={projects[1]} size="small" onOpen={setSelectedProject} />
-          <ProjectCard project={projects[2]} size="small" onOpen={setSelectedProject} />
+        <div className="portfolio__rail-label page-wrap" aria-hidden="true">
+          <span>Scroll to move through the work</span>
+          <span>Selected works / 2023—25</span>
         </div>
-        <div className="portfolio__foot">
-          <span>01 — 03</span>
-          <span className="portfolio__foot-line" />
-          <span>Selected works</span>
+        <div className="portfolio__viewport">
+          <div className="portfolio__track">
+            {projects.map((project) => (
+              <ProjectCard key={project.id} project={project} onOpen={setSelectedProject} />
+            ))}
+          </div>
+        </div>
+        <div className="portfolio__progress page-wrap" aria-hidden="true">
+          <span className="portfolio__progress-current">01</span>
+          <span className="portfolio__progress-track"><span className="portfolio__progress-fill" /></span>
+          <span>03</span>
+          <span className="portfolio__progress-label">Selected works</span>
         </div>
       </div>
       <ProjectDialog project={selectedProject} onClose={() => setSelectedProject(null)} />
@@ -332,53 +352,22 @@ function Disciplines() {
 }
 
 function Founders() {
-  const [activeIndex, setActiveIndex] = useState(null);
-  const activeFounder = activeIndex === null ? null : founders[activeIndex];
   return (
-    <section className="founders section-pad" id="founders" aria-labelledby="founders-title">
+    <section className="founders founders--orbital section-pad" id="founders" aria-labelledby="founders-title">
       <div className="founders__ambient" aria-hidden="true" />
       <div className="page-wrap founders__inner">
         <div className="founders__head reveal">
           <SectionLabel number="04">Our Founders</SectionLabel>
           <h2 id="founders-title">The Visionaries <em>Behind Pinnacle</em></h2>
         </div>
-        <div className="founder-planes reveal" role="group" aria-label="Five equally represented founders">
-          {founders.map((founder, index) => (
-            <button
-              key={founder.index}
-              className={`founder-plane${activeIndex === index ? " founder-plane--active" : ""}`}
-              type="button"
-              aria-pressed={activeIndex === index}
-              aria-label={`Select founder ${founder.index}: ${founder.label}`}
-              onClick={() => setActiveIndex(index)}
-            >
-              <span className="founder-plane__top"><span>FOUNDER</span><span>{founder.index}</span></span>
-              <span className="founder-plane__glyph" aria-hidden="true">
-                <span className="founder-plane__ring" />
-                <span className="founder-plane__axis" />
-                <span className="founder-plane__numeral">{founder.index}</span>
-              </span>
-              <span className="founder-plane__bottom">
-                <span className="founder-plane__name">{founder.label}</span>
-                <span className="founder-plane__role">Founder</span>
-              </span>
-              <span className="founder-plane__edge" aria-hidden="true" />
-            </button>
-          ))}
-        </div>
-        <div className="founders__selected reveal" aria-live="polite" aria-atomic="true">
-          {activeFounder && (
-            <>
-              <span className="founders__selected-index">{activeFounder.index} / 05</span>
-              <span className="founders__selected-name">{activeFounder.label}</span>
-              <span className="founders__selected-role">Founder</span>
-              <span className="founders__selected-line" />
-            </>
-          )}
-        </div>
       </div>
+      <FounderSphere />
     </section>
   );
+}
+
+function PointerLens() {
+  return <div className="pointer-lens" aria-hidden="true"><span>VIEW</span></div>;
 }
 
 function Footer() {
@@ -407,6 +396,7 @@ export default function App() {
     <div ref={pageRef} className="site-shell">
       <a className="skip-link" href="#main">Skip to content</a>
       <Header />
+      <PointerLens />
       <main id="main">
         <Hero />
         <Stats />
