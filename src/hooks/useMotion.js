@@ -18,7 +18,9 @@ function animateCounter(element, context) {
     duration: 1.5,
     ease: "power2.out",
     onUpdate: () => {
-      element.textContent = `${Math.round(counter.value).toLocaleString()}${suffix}`;
+      const rounded = Math.round(counter.value);
+      const formatted = element.dataset.grouping === "none" ? String(rounded) : rounded.toLocaleString();
+      element.textContent = `${formatted}${suffix}`;
     },
     scrollTrigger: { trigger: element, start: "top 90%", once: true },
   });

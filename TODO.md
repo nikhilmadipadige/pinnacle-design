@@ -2,13 +2,15 @@
 
 | Outcome | Status |
 |---|---|
-| Preserve approved copy, project facts, current images, palette, logo, no-enquiry decision, and five equal founders | Complete. Existing copy/palette retained; no enquiry form, biographies, roles, or portraits invented. Five founders remain equal peers. |
-| Founder interaction refinement | Implemented, awaiting user visual approval. The sample’s centered heading/instruction, rounded 896×600 desktop canvas stage, lower-left identity and lower-right arrow remain. The rejected visible card gallery is replaced by a warm architectural globe with orbital/latitude linework and five identical rotating founder markers. Keep Vijay Williams plus four placeholders, equal peer treatment, only the existing “Founder” label, no invented portraits/bios/roles, and preserve drag/swipe, stage wheel, keyboard, focus and reduced-motion behavior. Desktop/tablet/phone validation confirms rendering, no mobile overflow, all five accessible selection controls, next/Arrow/Home/End, small and standard wheel, mouse drag, touch swipe and reduced-motion selection. Keyboard focus expands a visible founder pill; stage wheel events are prevented without hijacking page scroll. Forced WebGL-unavailable test confirms the SVG fallback rotates; context-loss test restores it, and renderer/resize cleanup is covered. |
+| Preserve approved copy, project facts, current images, palette, logo, and five equal founders | Complete. Existing copy/palette retained; no biographies, roles, or portraits invented. Five founders remain equal peers. |
+| Founder interaction refinement | Implemented, awaiting the latest visual review. Preserves the sample-led grayscale discs and corner arrivals; adds only a faint blurred architectural texture and cool bloom behind the images, with no globe/orbit graphics or competing photo. Five equal founder states, drag/swipe, wheel, keyboard, visible focus, reduced-motion and SVG/WebGL fallback remain. Founder instruction now matches disc navigation. |
+| Enquiry form | Implemented and tested. Adds name, email, project type and project notes in a responsive editorial section. The form explicitly says it is a prototype; valid dummy submit was prevented, URL unchanged, and zero fetch/XHR/beacon calls occurred. No data is sent or persisted; only a local status message appears. |
+| Year founded | Complete. The existing animated statistic displays `2023` without a thousands separator; other counters retain locale formatting. |
 | Discipline interaction refinement | Complete. Restrained floating particles pause offscreen and with reduced motion; detailed blueprints open on hover/focus and via a labeled touch toggle. Existing three descriptions are preserved. |
 | Existing layout | Complete. Photo-led project section and accessible native project dialog retained; cursor remains visible/usable, and open/close motion is disabled for reduced-motion users. |
-| Build/security | Complete. Production build and `git diff --check` pass; `npm audit --omit=dev` reports 0 vulnerabilities. Vite retains its advisory that the Three.js vendor chunk exceeds 500 kB (181 kB gzip). |
-| GitHub delivery | Complete. Founders sphere/accessibility refinement `a4b4268` is pushed to `main`; working tree is clean. |
-| Vercel | Static build configuration is intact. Post-push live check still serves bundle `CA4FColA`, while the latest build expects `CpMfIf3X`; manually redeploy the current `main` commit from the Vercel project before treating the public URL as updated. |
+| Build/security | Current local correction builds; `git diff --check` passes and `npm audit --omit=dev` reports 0 vulnerabilities. Vite retains its advisory that the lazy Three.js vendor chunk exceeds 500 kB (181 kB gzip). |
+| GitHub delivery | Previous globe version `a4b4268` remains on `main` at the start of this delivery; this correction is staged for final commit/push after the final build. |
+| Vercel | The last known public bundle was stale. Check again after pushing this revision; if needed, redeploy from the Vercel project. |
 
 ## Awaiting client assets
 

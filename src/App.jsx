@@ -19,6 +19,7 @@ const navItems = [
   ["Works", "#gallery"],
   ["Disciplines", "#disciplines"],
   ["Founders", "#founders"],
+  ["Enquire", "#enquiry"],
 ];
 
 function BrandMark() {
@@ -134,7 +135,7 @@ function Stats() {
         {statistics.map(([value, label], index) => (
           <div className="stat" key={label}>
             <span className="stat__index">0{index + 1}</span>
-            <strong>{value}</strong>
+            <strong data-grouping={label === "Year Founded" ? "none" : "locale"}>{value}</strong>
             <span>{label}</span>
           </div>
         ))}
@@ -402,11 +403,78 @@ function Founders() {
           <p className="founders__eyebrow">Our Founders</p>
           <h2 id="founders-title">The Visionaries <em>Behind Pinnacle</em></h2>
           <p className="founders__intro">
-            Drag or scroll the sphere to explore the leadership team steering our spatial architecture.
+            Drag or scroll to explore the founders behind our spatial architecture.
           </p>
         </div>
       </div>
       <FounderRegister />
+    </section>
+  );
+}
+
+function Enquiry() {
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    setSubmitted(true);
+  };
+
+  return (
+    <section className="enquiry section-pad" id="enquiry" aria-labelledby="enquiry-title">
+      <div className="page-wrap enquiry__layout">
+        <div className="enquiry__intro reveal">
+          <SectionLabel number="04">Studio Enquiry</SectionLabel>
+          <h2 id="enquiry-title">A new space begins with a <em>conversation.</em></h2>
+          <p>Tell us a little about what you are imagining. This short form is a starting point for your project notes.</p>
+          <figure className="enquiry__visual">
+            <img src={projects[1].image} alt="" loading="lazy" />
+            <span className="enquiry__visual-wash" aria-hidden="true" />
+            <span className="enquiry__visual-datum" aria-hidden="true" />
+            <figcaption><span>Material study</span><span>02 / Interior</span></figcaption>
+          </figure>
+        </div>
+
+        <form className="enquiry__form" onSubmit={handleSubmit}>
+          <div className="enquiry__form-head">
+            <span>Project details</span>
+            <span>01 — 04</span>
+          </div>
+          <div className="enquiry__fields">
+            <label className="enquiry__field">
+              <span>Your name</span>
+              <input type="text" name="name" autoComplete="name" placeholder="Name" required />
+            </label>
+            <label className="enquiry__field">
+              <span>Email address</span>
+              <input type="email" name="email" autoComplete="email" placeholder="Email" required />
+            </label>
+            <label className="enquiry__field enquiry__field--wide">
+              <span>Project focus</span>
+              <select name="projectType" defaultValue="" required>
+                <option value="" disabled>Select an area</option>
+                <option value="residential-interior">Residential interior</option>
+                <option value="bespoke-millwork">Bespoke millwork</option>
+                <option value="spatial-divider">Spatial divider</option>
+                <option value="exploring">Still exploring</option>
+              </select>
+            </label>
+            <label className="enquiry__field enquiry__field--wide">
+              <span>A few notes about your space</span>
+              <textarea name="projectNotes" rows="3" placeholder="What would you like to shape?" />
+            </label>
+          </div>
+          <div className="enquiry__form-foot">
+            <p className="enquiry__prototype">Prototype only. This form is not connected; nothing is sent or saved.</p>
+            <button className="enquiry__submit" type="submit">
+              Prepare enquiry <ArrowUpRight size={16} strokeWidth={1.5} />
+            </button>
+          </div>
+          <p className="enquiry__status" role="status" aria-live="polite">
+            {submitted ? "Preview only — no details were sent or stored." : ""}
+          </p>
+        </form>
+      </div>
     </section>
   );
 }
@@ -444,6 +512,7 @@ export default function App() {
         <Portfolio />
         <Disciplines />
         <Founders />
+        <Enquiry />
       </main>
       <Footer />
     </div>

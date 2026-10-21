@@ -1,75 +1,78 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { founders } from "../content.js";
+import { founders, projects } from "../content.js";
 
 const TURN = 360 / founders.length;
 const TAU = Math.PI * 2;
+const DISC_RADIUS = 1.04;
+const DISC_IMAGE_INDEX = [0, 1, 2, 0, 2];
+const DISC_CROP_OFFSETS = [0, 0, 0, 0.13, -0.13];
 const wrapIndex = (index) => (index + founders.length) % founders.length;
 const nearestEquivalentRotation = (target, current) => target + 360 * Math.round((current - target) / 360);
 
-function SphereFallback({ activeIndex, rotation }) {
-  const markerPoints = founders.map((_, index) => {
+function ImageDiscFallback({ activeIndex, rotation }) {
+  const discs = founders.map((_, index) => {
+    const baseAngle = (index * TAU) / founders.length;
     const angle = (index * TAU) / founders.length + (rotation * Math.PI) / 180;
+    const depth = (Math.cos(angle) + 1) / 2;
+    const visibilityPosition = Math.max(0, Math.min(1, (depth - 0.2) / 0.35));
+    const visibility = visibilityPosition * visibilityPosition * (3 - 2 * visibilityPosition);
     return {
       index,
-      x: 450 + Math.sin(angle) * 218,
-      y: 282 + Math.sin(angle * 2) * 9,
-      depth: Math.cos(angle),
+      image: projects[DISC_IMAGE_INDEX[index]].image,
+      cropAnchor: index === 3 ? "xMinYMid slice" : index === 4 ? "xMaxYMid slice" : "xMidYMid slice",
+      x: 450 + Math.sin(angle) * 420,
+      y: 270 + (Math.sin(baseAngle) - Math.sin((activeIndex * TAU) / founders.length)) * 205,
+      depth,
+      visibility,
+      scale: depth > 0.96 ? 1 : 0.16 + depth * 0.22,
     };
   });
 
-  const marker = ({ index, x, y, depth }) => (
-    <g
-      key={index}
-      data-founder-index={index}
-      transform={`translate(${x} ${y})`}
-      opacity={depth < 0 ? 0.62 : 0.95}
-      className={index === activeIndex ? "founder-carousel__fallback-marker is-active" : "founder-carousel__fallback-marker"}
-    >
-      <circle r="18" className="founder-carousel__fallback-marker-halo" />
-      <circle r="13" className="founder-carousel__fallback-marker-core" />
-      <circle r="5" className="founder-carousel__fallback-marker-point" />
-    </g>
-  );
-
   return (
-    <svg className="founder-carousel__fallback" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <svg
+      className="founder-carousel__fallback"
+      viewBox="0 0 900 600"
+      preserveAspectRatio="xMidYMid slice"
+      aria-hidden="true"
+    >
       <defs>
-        <radialGradient id="founder-orb-core" cx="34%" cy="26%" r="76%">
-          <stop offset="0%" stopColor="#756047" stopOpacity="0.48" />
-          <stop offset="42%" stopColor="#30271d" stopOpacity="0.38" />
-          <stop offset="100%" stopColor="#090909" stopOpacity="0.08" />
-        </radialGradient>
-        <radialGradient id="founder-orb-glow">
-          <stop offset="0%" stopColor="#c5a880" stopOpacity="0.20" />
-          <stop offset="56%" stopColor="#c5a880" stopOpacity="0.055" />
-          <stop offset="100%" stopColor="#c5a880" stopOpacity="0" />
-        </radialGradient>
-        <filter id="founder-orb-soft-glow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="7" />
-        </filter>
+        {discs.map(({ index }) => (
+          <clipPath id={`founder-disc-clip-${index}`} key={index}>
+            <circle r="184" />
+          </clipPath>
+        ))}
       </defs>
-
-      <ellipse cx="450" cy="282" rx="278" ry="156" className="founder-carousel__fallback-orbit" />
-      <ellipse cx="450" cy="282" rx="250" ry="94" transform="rotate(-18 450 282)" className="founder-carousel__fallback-orbit is-secondary" />
-      <ellipse cx="450" cy="282" rx="250" ry="94" transform="rotate(18 450 282)" className="founder-carousel__fallback-orbit is-secondary" />
-
-      <circle cx="450" cy="282" r="206" fill="url(#founder-orb-glow)" />
-      <circle cx="450" cy="282" r="148" fill="url(#founder-orb-core)" className="founder-carousel__fallback-globe" />
-      <ellipse cx="450" cy="282" rx="148" ry="57" className="founder-carousel__fallback-latitude" />
-      <ellipse cx="450" cy="282" rx="148" ry="107" className="founder-carousel__fallback-latitude is-soft" />
-      <ellipse cx="450" cy="282" rx="62" ry="148" className="founder-carousel__fallback-longitude" />
-      <ellipse cx="450" cy="282" rx="110" ry="148" transform="rotate(34 450 282)" className="founder-carousel__fallback-longitude is-soft" />
-      <ellipse cx="450" cy="282" rx="110" ry="148" transform="rotate(-34 450 282)" className="founder-carousel__fallback-longitude is-soft" />
-      <path d="M302 282h296M450 134v296" className="founder-carousel__fallback-axis" />
-      <circle cx="450" cy="282" r="3" className="founder-carousel__fallback-center" />
-
-      {markerPoints.map(marker)}
+      {discs
+        .sort((a, b) => a.depth - b.depth)
+        .map(({ index, image, cropAnchor, x, y, depth, visibility, scale }) => (
+          <g
+            key={index}
+            data-founder-index={index}
+            transform={`translate(${x} ${y}) scale(${scale})`}
+            opacity={visibility}
+            className={index === activeIndex ? "founder-carousel__fallback-disc is-active" : "founder-carousel__fallback-disc"}
+          >
+            <circle r="187" className="founder-carousel__fallback-disc-shadow" />
+            <image
+              href={image}
+              x="-184"
+              y="-184"
+              width="368"
+              height="368"
+              preserveAspectRatio={cropAnchor}
+              clipPath={`url(#founder-disc-clip-${index})`}
+              className="founder-carousel__fallback-image"
+              style={{ "--disc-brightness": 0.42 + depth * 0.58 }}
+            />
+            <circle r="184" className="founder-carousel__fallback-disc-edge" />
+          </g>
+        ))}
     </svg>
   );
 }
 
-function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRef, setFallbackRotation }) {
+function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRef, setFallbackRotation, fallbackRotation }) {
   const canvasRef = useRef(null);
   const [webglReady, setWebglReady] = useState(false);
 
@@ -85,6 +88,7 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
     let renderer = null;
     let scene = null;
     let resize = null;
+    const textures = [];
 
     const stopResizeObservation = () => {
       resizeObserver?.disconnect();
@@ -96,13 +100,18 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
       stopResizeObservation();
       const disposedScene = scene;
       if (disposedScene) {
+        const disposedGeometries = new Set();
         disposedScene.traverse((object) => {
-          object.geometry?.dispose?.();
+          if (object.geometry && !disposedGeometries.has(object.geometry)) {
+            disposedGeometries.add(object.geometry);
+            object.geometry.dispose?.();
+          }
           if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose?.());
           else object.material?.dispose?.();
         });
         scene = null;
       }
+      textures.splice(0).forEach((texture) => texture.dispose?.());
       renderer?.dispose();
       renderer = null;
       if (sceneRef.current?.scene === disposedScene) sceneRef.current = null;
@@ -125,6 +134,7 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         const threeModule = await import("three");
         if (cancelled) return;
         const THREE = threeModule.default ?? threeModule;
+
         renderer = new THREE.WebGLRenderer({
           canvas,
           alpha: true,
@@ -134,214 +144,159 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
         renderer.setClearColor(0x000000, 0);
         renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.12;
 
         scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 60);
         camera.position.set(0, 0, 8.8);
         camera.lookAt(0, 0, 0);
 
-        scene.add(new THREE.HemisphereLight(0xf0e4d0, 0x100e0b, 1.9));
-        const keyLight = new THREE.DirectionalLight(0xe8d1a9, 4.5);
-        keyLight.position.set(-3.6, 4.4, 5.2);
-        scene.add(keyLight);
-        const rimLight = new THREE.PointLight(0x9f774b, 5.8, 12, 2);
-        rimLight.position.set(3.8, 0.8, -2.8);
-        scene.add(rimLight);
-        const activeLight = new THREE.PointLight(0xd8c19f, 2.2, 3.8, 2);
-        scene.add(activeLight);
+        const loader = new THREE.TextureLoader();
+        const loadedTextures = await Promise.all(
+          projects.map(async (project) => {
+            try {
+              const texture = await loader.loadAsync(project.image);
+              textures.push(texture);
+              texture.colorSpace = THREE.SRGBColorSpace;
+              texture.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
+              return texture;
+            } catch {
+              return null;
+            }
+          }),
+        );
+        if (cancelled) {
+          disposeResources();
+          return;
+        }
+        const fallbackTexture = loadedTextures.find(Boolean);
+        if (!fallbackTexture) throw new Error("Founder imagery could not be loaded");
 
         const composition = new THREE.Group();
-        composition.position.y = 0.15;
         scene.add(composition);
-
-        const globe = new THREE.Group();
-        composition.add(globe);
-        const globeRadius = 1.5;
-        const globeGeometry = new THREE.SphereGeometry(globeRadius, 56, 42);
-        const globeMaterial = new THREE.MeshStandardMaterial({
-          color: 0x59452c,
-          metalness: 0.28,
-          roughness: 0.38,
-          emissive: 0x4a3317,
-          emissiveIntensity: 0.38,
+        const discGeometry = new THREE.CircleGeometry(DISC_RADIUS, 72);
+        const underlayGeometry = new THREE.CircleGeometry(DISC_RADIUS + 0.035, 72);
+        const edgeGeometry = new THREE.RingGeometry(DISC_RADIUS - 0.009, DISC_RADIUS + 0.003, 72);
+        const underlayMaterial = new THREE.MeshBasicMaterial({
+          color: 0x080909,
+          side: THREE.DoubleSide,
+          depthWrite: true,
         });
-        globe.add(new THREE.Mesh(globeGeometry, globeMaterial));
-
-        const latitudeMaterial = new THREE.LineBasicMaterial({
-          color: 0xd2b98f,
-          transparent: true,
-          opacity: 0.36,
-          depthWrite: false,
-        });
-        const longitudeMaterial = new THREE.LineBasicMaterial({
-          color: 0xc5a880,
-          transparent: true,
-          opacity: 0.25,
-          depthWrite: false,
-        });
-
-        const addClosedLine = (parent, points, material) => {
-          const geometry = new THREE.BufferGeometry().setFromPoints(points);
-          parent.add(new THREE.LineLoop(geometry, material));
-        };
-
-        [-0.76, -0.4, 0, 0.4, 0.76].forEach((latitude) => {
-          const ringRadius = globeRadius * Math.cos(latitude);
-          const y = globeRadius * Math.sin(latitude);
-          const points = [];
-          for (let step = 0; step < 96; step += 1) {
-            const angle = (step / 96) * TAU;
-            points.push(new THREE.Vector3(Math.cos(angle) * ringRadius, y, Math.sin(angle) * ringRadius));
-          }
-          addClosedLine(globe, points, latitudeMaterial);
-        });
-
-        for (let meridian = 0; meridian < 6; meridian += 1) {
-          const longitude = (meridian / 6) * Math.PI;
-          const points = [];
-          for (let step = 0; step < 96; step += 1) {
-            const angle = (step / 96) * TAU;
-            const ring = globeRadius * Math.cos(angle);
-            points.push(new THREE.Vector3(
-              ring * Math.sin(longitude),
-              globeRadius * Math.sin(angle),
-              ring * Math.cos(longitude),
-            ));
-          }
-          addClosedLine(globe, points, longitudeMaterial);
-        }
-
-        const frontRim = new THREE.Mesh(
-          new THREE.TorusGeometry(globeRadius + 0.012, 0.006, 5, 120),
-          new THREE.MeshBasicMaterial({ color: 0xc5a880, transparent: true, opacity: 0.44 }),
-        );
-        frontRim.rotation.x = Math.PI / 2;
-        globe.add(frontRim);
-
-        const orbitRadius = 2.64;
-        const orbitalMaterial = new THREE.MeshBasicMaterial({
-          color: 0xbca27b,
-          transparent: true,
-          opacity: 0.48,
-          depthWrite: false,
-        });
-        const orbit = new THREE.Mesh(
-          new THREE.TorusGeometry(orbitRadius, 0.006, 5, 180),
-          orbitalMaterial,
-        );
-        orbit.rotation.x = Math.PI / 2;
-        composition.add(orbit);
-
-        const inclinedOrbit = new THREE.Mesh(
-          new THREE.TorusGeometry(orbitRadius * 0.98, 0.0045, 5, 180),
-          new THREE.MeshBasicMaterial({ color: 0x8a775d, transparent: true, opacity: 0.22, depthWrite: false }),
-        );
-        inclinedOrbit.rotation.set(1.17, 0.06, -0.24);
-        composition.add(inclinedOrbit);
-
-        const markerGeometry = new THREE.SphereGeometry(0.17, 24, 18);
-        const markerRingGeometry = new THREE.TorusGeometry(0.235, 0.007, 5, 48);
-        const markerGroups = founders.map((_, index) => {
+        const discPositions = founders.map((_, index) => {
           const angle = (index / founders.length) * TAU;
-          const marker = new THREE.Group();
-          marker.position.set(Math.sin(angle) * orbitRadius, 0, Math.cos(angle) * orbitRadius);
-          marker.rotation.y = angle;
-
-          const material = new THREE.MeshStandardMaterial({
-            color: 0xc5a880,
-            metalness: 0.6,
-            roughness: 0.22,
-            emissive: 0x5d482a,
-            emissiveIntensity: index === activeIndexRef.current ? 0.46 : 0.14,
-            transparent: true,
-            opacity: 0.9,
-            depthTest: false,
-            depthWrite: false,
-          });
-          const bead = new THREE.Mesh(markerGeometry, material);
-          bead.renderOrder = 12;
-          marker.add(bead);
-          const haloMaterial = new THREE.MeshBasicMaterial({
-            color: 0xd8c19f,
-            transparent: true,
-            opacity: 0.54,
-            depthTest: false,
-            depthWrite: false,
-          });
-          const halo = new THREE.Mesh(
-            markerRingGeometry,
-            haloMaterial,
+          return new THREE.Vector3(
+            Math.sin(angle) * 3.45,
+            -Math.sin(angle) * 1.85,
+            Math.cos(angle) * 3.45,
           );
-          halo.renderOrder = 13;
-          marker.add(halo);
-          marker.userData.material = material;
-          marker.userData.haloMaterial = haloMaterial;
-          composition.add(marker);
-          return marker;
         });
-
-        const axisGeometry = new THREE.BufferGeometry().setFromPoints([
-          new THREE.Vector3(-4.4, -0.02, -0.12),
-          new THREE.Vector3(4.4, -0.02, -0.12),
-        ]);
-        composition.add(new THREE.Line(
-          axisGeometry,
-          new THREE.LineBasicMaterial({ color: 0xa98b61, transparent: true, opacity: 0.12, depthWrite: false }),
-        ));
-
-        const dustPositions = [];
-        for (let index = 0; index < 34; index += 1) {
-          const angle = index * 2.399963229728653;
-          const radius = 2.9 + (index % 5) * 0.33;
-          dustPositions.push(
-            Math.cos(angle) * radius,
-            Math.sin(angle * 1.7) * (0.7 + (index % 4) * 0.23),
-            -1.4 + (index % 7) * 0.48,
-          );
-        }
-        const dustGeometry = new THREE.BufferGeometry();
-        dustGeometry.setAttribute("position", new THREE.Float32BufferAttribute(dustPositions, 3));
-        scene.add(new THREE.Points(
-          dustGeometry,
-          new THREE.PointsMaterial({
-            color: 0xd1ba94,
-            size: 0.018,
+        const discs = founders.map((_, index) => {
+          const texture = loadedTextures[DISC_IMAGE_INDEX[index]] ?? fallbackTexture;
+          const material = new THREE.ShaderMaterial({
+            uniforms: {
+              uMap: { value: texture },
+              uAspect: { value: texture.image.width / texture.image.height },
+              uCropOffset: { value: new THREE.Vector2(DISC_CROP_OFFSETS[index], 0) },
+              uBrightness: { value: 1 },
+              uOpacity: { value: 1 },
+            },
+            vertexShader: `
+              varying vec2 vUv;
+              void main() {
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+              }
+            `,
+            fragmentShader: `
+              uniform sampler2D uMap;
+              uniform float uAspect;
+              uniform vec2 uCropOffset;
+              uniform float uBrightness;
+              uniform float uOpacity;
+              varying vec2 vUv;
+              void main() {
+                vec2 sampleUv = vUv - 0.5;
+                if (uAspect > 1.0) {
+                  sampleUv.x /= uAspect;
+                } else {
+                  sampleUv.y *= uAspect;
+                }
+                sampleUv += 0.5 + uCropOffset;
+                vec3 source = texture2D(uMap, sampleUv).rgb;
+                float luminance = dot(source, vec3(0.2126, 0.7152, 0.0722));
+                float contrast = clamp((luminance - 0.36) * 1.35 + 0.5, 0.0, 1.0);
+                float vignette = smoothstep(0.72, 0.18, length(vUv - 0.5));
+                float imageTone = contrast * (0.84 + 0.16 * vignette) * uBrightness;
+                gl_FragColor = vec4(vec3(imageTone), uOpacity);
+                #include <tonemapping_fragment>
+                #include <colorspace_fragment>
+              }
+            `,
+            side: THREE.DoubleSide,
             transparent: true,
-            opacity: 0.38,
             depthWrite: false,
-            sizeAttenuation: true,
-          }),
-        ));
+            toneMapped: false,
+          });
+
+          const disc = new THREE.Group();
+          disc.position.copy(discPositions[index]);
+          disc.userData.index = index;
+          disc.userData.imageMaterial = material;
+
+          const underlay = new THREE.Mesh(underlayGeometry, underlayMaterial);
+          underlay.position.z = -0.014;
+          disc.add(underlay);
+
+          const image = new THREE.Mesh(discGeometry, material);
+          image.position.z = 0.002;
+          disc.add(image);
+
+          const edge = new THREE.Mesh(edgeGeometry, new THREE.MeshBasicMaterial({
+            color: 0xd7dcdd,
+            transparent: true,
+            opacity: 0.28,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+            toneMapped: false,
+          }));
+          edge.position.z = 0.012;
+          disc.add(edge);
+          disc.userData.edgeMaterial = edge.material;
+
+          composition.add(disc);
+          return disc;
+        });
 
         const worldPosition = new THREE.Vector3();
+        const faceDirection = new THREE.Vector3();
+        const forward = new THREE.Vector3(0, 0, 1);
+        const facingQuaternion = new THREE.Quaternion();
+        const inverseCompositionQuaternion = new THREE.Quaternion();
         const render = () => renderer?.render(scene, camera);
-        const updateDepth = () => markerGroups.forEach((marker) => {
-          marker.getWorldPosition(worldPosition);
-          const frontness = THREE.MathUtils.clamp((worldPosition.z + 0.25) / (orbitRadius * 1.08), 0, 1);
-          marker.userData.material.opacity = 0.34 + frontness * 0.56;
-          marker.userData.haloMaterial.opacity = 0.2 + frontness * 0.4;
+        const updateDepth = () => discs.forEach((disc) => {
+          disc.getWorldPosition(worldPosition);
+          const frontness = THREE.MathUtils.clamp((worldPosition.z + 3.45) / 6.9, 0, 1);
+          const visibility = THREE.MathUtils.smoothstep(frontness, 0.2, 0.55);
+          disc.scale.setScalar(frontness > 0.96 ? 1 : 0.1 + frontness * 0.44);
+          disc.userData.imageMaterial.uniforms.uBrightness.value = 0.26 + frontness * 0.74;
+          disc.userData.imageMaterial.uniforms.uOpacity.value = visibility;
+          disc.userData.edgeMaterial.opacity = visibility * 0.28;
+          faceDirection.copy(camera.position).sub(worldPosition).normalize();
+          facingQuaternion.setFromUnitVectors(forward, faceDirection);
+          inverseCompositionQuaternion.copy(composition.quaternion).invert();
+          disc.quaternion.copy(inverseCompositionQuaternion).multiply(facingQuaternion);
         });
-        const updateLight = (index) => {
-          const selected = markerGroups[wrapIndex(index)];
-          selected.getWorldPosition(worldPosition);
-          activeLight.position.copy(worldPosition);
+        const centerActiveDisc = () => {
+          composition.position.y = -discPositions[wrapIndex(activeIndexRef.current)].y;
         };
         const setRotation = (degrees) => {
-          const radians = THREE.MathUtils.degToRad(degrees);
-          composition.rotation.y = radians;
-          globe.rotation.y = radians * 0.2;
+          composition.rotation.y = THREE.MathUtils.degToRad(degrees);
+          centerActiveDisc();
           updateDepth();
-          updateLight(activeIndexRef.current);
           render();
         };
-        const setActive = (index) => {
-          markerGroups.forEach((marker, markerIndex) => {
-            marker.userData.material.emissiveIntensity = markerIndex === index ? 0.46 : 0.14;
-          });
+        const setActive = () => {
+          centerActiveDisc();
           updateDepth();
-          updateLight(index);
           render();
         };
 
@@ -352,10 +307,10 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           const height = Math.max(1, bounds.height);
           const aspect = width / height;
           camera.aspect = aspect;
-          camera.fov = aspect < 0.9 ? 39 : 34;
-          camera.position.z = aspect < 0.9 ? 8.65 : 8.8;
+          camera.fov = aspect < 0.9 ? 39 : aspect < 1.25 ? 36 : 34;
+          camera.position.z = aspect < 0.9 ? 9.4 : aspect < 1.25 ? 9.1 : 8.8;
           camera.updateProjectionMatrix();
-          composition.scale.setScalar(aspect < 0.9 ? 0.82 : 0.96);
+          composition.scale.setScalar(aspect < 0.9 ? 0.86 : aspect < 1.25 ? 0.93 : 1);
           renderer.setSize(width, height, false);
           setRotation(trackRef.current.rotationY);
         };
@@ -368,7 +323,6 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         if (!resizeObserver) window.addEventListener("resize", resize);
         if (!cancelled) setWebglReady(true);
       } catch {
-        // A static SVG sphere remains visible if WebGL or Three.js is unavailable.
         stopResizeObservation();
         setFallbackRotation(trackRef.current.rotationY);
         disposeResources();
@@ -399,7 +353,7 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
   return (
     <div className={`founder-carousel__scene${webglReady ? " is-webgl-ready" : ""}`} aria-hidden="true">
       <canvas className="founder-carousel__canvas" ref={canvasRef} />
-      <SphereFallback activeIndex={activeIndex} rotation={trackRef.current.rotationY} />
+      <ImageDiscFallback activeIndex={activeIndex} rotation={fallbackRotation} />
     </div>
   );
 }
@@ -557,7 +511,6 @@ export default function FounderRegister() {
         onPointerCancel={finishPointer}
       >
         <div className="founder-carousel__field" aria-hidden="true">
-          <span className="founder-carousel__field-halo" />
           <FounderScene
             frameRef={stageRef}
             activeIndex={activeIndex}
@@ -565,6 +518,7 @@ export default function FounderRegister() {
             trackRef={trackRef}
             sceneRef={sceneRef}
             setFallbackRotation={setFallbackRotation}
+            fallbackRotation={fallbackRotation}
           />
         </div>
 
@@ -590,7 +544,6 @@ export default function FounderRegister() {
 
         <div className="founder-carousel__caption" aria-live="polite" aria-atomic="true">
           <div className="founder-carousel__identity" key={activeFounder.index}>
-            <span className="founder-carousel__overline">Founder {activeFounder.index} / 05</span>
             <h3 className="founder-carousel__name">{activeFounder.label}</h3>
             <p className="founder-carousel__role">Founder</p>
           </div>
