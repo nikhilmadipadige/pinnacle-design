@@ -7,8 +7,8 @@
 | Discipline interaction refinement | Complete. Restrained floating particles pause offscreen and with reduced motion; detailed blueprints open on hover/focus and via a labeled touch toggle. Existing three descriptions are preserved. |
 | Existing layout | Complete. Photo-led project section and accessible native project dialog retained; cursor remains visible/usable, and open/close motion is disabled for reduced-motion users. |
 | Build/security | Complete. Production build and `git diff --check` pass; `npm audit --omit=dev` reports 0 vulnerabilities. Vite retains its advisory that the Three.js vendor chunk exceeds 500 kB (181 kB gzip). |
-| GitHub delivery | Previous founders refinement `34b6a47` is on `main`; the latest sphere/accessibility edge-case work is validated locally and awaiting its commit/push. |
-| Vercel | Static build configuration is intact. The prior public check showed a stale bundle; recheck the production bundle after pushing this revision before treating the public URL as updated. |
+| GitHub delivery | Complete. Founders sphere/accessibility refinement `a4b4268` is pushed to `main`; working tree is clean. |
+| Vercel | Static build configuration is intact. Post-push live check still serves bundle `CA4FColA`, while the latest build expects `CpMfIf3X`; manually redeploy the current `main` commit from the Vercel project before treating the public URL as updated. |
 
 ## Awaiting client assets
 

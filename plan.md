@@ -31,7 +31,7 @@ Use GSAP/SplitText and ScrollTrigger for the existing hero reveals, project-imag
 
 ## Delivery
 
-A GitHub push is not proof of Vercel deployment. The user-facing Vercel domain previously served an older bundle and its project binding was not visible in this session; report deployment status based on an actual live check. Replace assets and founder details only when supplied and approved.
+The founders sphere/accessibility revision is pushed to GitHub `main` at `a4b4268`. A post-push check shows the public Vercel domain still serves a different JS bundle (`CA4FColA` rather than the current local `CpMfIf3X`); manually redeploy the latest `main` commit from the Vercel project before treating the public URL as updated. Replace assets and founder details only when supplied and approved.
 
 
 ## Interaction refinement requested 2026-10-21
