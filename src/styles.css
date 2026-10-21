@@ -6403,8 +6403,245 @@ img {
   }
 }
 
+/* Sample-led sphere field: the canvas is the visual focus, not a stack of cards. */
+.founder-carousel__frame {
+  --carousel-radius: 0px;
+  border-color: rgba(245, 243, 239, 0.13);
+  background:
+    radial-gradient(ellipse at 50% 47%, rgba(197, 168, 128, 0.105), transparent 36%),
+    radial-gradient(ellipse at 50% 52%, rgba(65, 71, 58, 0.055), transparent 62%),
+    #080808;
+  box-shadow: 0 32px 88px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  perspective: none;
+}
+
+.founder-carousel__frame:focus-within {
+  border-color: rgba(216, 193, 159, 0.7);
+  box-shadow: 0 0 0 1px rgba(216, 193, 159, 0.18), 0 32px 88px rgba(0, 0, 0, 0.28);
+}
+
+.founder-carousel__frame::before {
+  z-index: 2;
+  background:
+    linear-gradient(90deg, rgba(7, 7, 6, 0.24), transparent 19%, transparent 81%, rgba(7, 7, 6, 0.24)),
+    linear-gradient(180deg, rgba(7, 7, 6, 0.1), transparent 20%, transparent 73%, rgba(7, 7, 6, 0.12));
+}
+
+.founder-carousel__frame::after {
+  z-index: 3;
+  height: 156px;
+  background: linear-gradient(0deg, rgba(7, 7, 6, 0.93), rgba(7, 7, 6, 0.65) 45%, transparent);
+}
+
+.founder-carousel__field {
+  z-index: 0;
+}
+
+.founder-carousel__field-halo {
+  top: 45%;
+  width: min(60vw, 620px);
+  background: radial-gradient(circle, rgba(197, 168, 128, 0.13), rgba(197, 168, 128, 0.035) 39%, transparent 70%);
+  filter: blur(8px);
+}
+
+.founder-carousel__scene {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.founder-carousel__canvas,
+.founder-carousel__fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.founder-carousel__canvas {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.founder-carousel__fallback {
+  z-index: 0;
+  overflow: visible;
+  opacity: 1;
+  transition: opacity 420ms ease;
+}
+
+.founder-carousel__scene.is-webgl-ready .founder-carousel__canvas {
+  opacity: 1;
+}
+
+.founder-carousel__scene.is-webgl-ready .founder-carousel__fallback {
+  opacity: 0;
+}
+
+.founder-carousel__fallback-orbit {
+  fill: none;
+  stroke: rgba(197, 168, 128, 0.28);
+  stroke-width: 0.9;
+}
+
+.founder-carousel__fallback-orbit.is-secondary {
+  stroke: rgba(197, 168, 128, 0.12);
+  stroke-dasharray: 1 6;
+}
+
+.founder-carousel__fallback-globe {
+  stroke: rgba(216, 193, 159, 0.48);
+  stroke-width: 0.9;
+}
+
+.founder-carousel__fallback-latitude,
+.founder-carousel__fallback-longitude {
+  fill: none;
+  stroke: rgba(216, 193, 159, 0.4);
+  stroke-width: 0.8;
+}
+
+.founder-carousel__fallback-latitude.is-soft,
+.founder-carousel__fallback-longitude.is-soft {
+  stroke: rgba(216, 193, 159, 0.18);
+  stroke-dasharray: 1 4;
+}
+
+.founder-carousel__fallback-axis {
+  fill: none;
+  stroke: rgba(216, 193, 159, 0.28);
+  stroke-width: 0.7;
+}
+
+.founder-carousel__fallback-center {
+  fill: var(--gold-light);
+  filter: drop-shadow(0 0 7px rgba(216, 193, 159, 0.9));
+}
+
+.founder-carousel__fallback-marker-halo {
+  fill: rgba(197, 168, 128, 0.04);
+  stroke: rgba(197, 168, 128, 0.42);
+  stroke-width: 1;
+}
+
+.founder-carousel__fallback-marker-core {
+  fill: #272116;
+  stroke: rgba(216, 193, 159, 0.68);
+  stroke-width: 1.2;
+}
+
+.founder-carousel__fallback-marker-point {
+  fill: rgba(216, 193, 159, 0.82);
+}
+
+.founder-carousel__fallback-marker.is-active .founder-carousel__fallback-marker-halo {
+  fill: rgba(197, 168, 128, 0.17);
+  stroke: rgba(245, 227, 194, 0.92);
+  filter: drop-shadow(0 0 9px rgba(216, 193, 159, 0.86));
+}
+
+.founder-carousel__fallback-marker.is-active .founder-carousel__fallback-marker-core {
+  fill: #796246;
+}
+
+.founder-carousel__fallback-marker.is-active .founder-carousel__fallback-marker-point {
+  fill: #fff0d5;
+}
+
+.founder-carousel__sr-controls {
+  position: absolute;
+  z-index: 4;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.founder-carousel__sr-controls button {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.founder-carousel__sr-controls:focus-within {
+  top: 18px;
+  left: 18px;
+  display: flex;
+  width: max-content;
+  height: auto;
+  max-width: calc(100% - 36px);
+  align-items: center;
+  overflow: visible;
+  padding: 9px 12px;
+  clip: auto;
+  clip-path: none;
+  border: 1px solid rgba(216, 193, 159, 0.44);
+  border-radius: 999px;
+  background: rgba(15, 14, 12, 0.94);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  white-space: normal;
+}
+
+.founder-carousel__sr-controls:focus-within button[aria-pressed="true"] {
+  position: relative;
+  display: block;
+  width: auto;
+  height: auto;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  border: 0;
+  color: var(--cream);
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  outline: 2px solid var(--gold-light);
+  outline-offset: 5px;
+  text-transform: uppercase;
+  white-space: normal;
+}
+
+@media (max-width: 1050px) {
+  .founder-carousel__frame {
+    height: 540px;
+  }
+}
+
+@media (max-width: 760px) {
+  .founder-carousel__frame {
+    height: 480px;
+    perspective: none;
+  }
+
+  .founder-carousel__field-halo {
+    width: 82vw;
+  }
+}
+
+@media (max-width: 390px) {
+  .founder-carousel__frame {
+    height: 438px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .founder-carousel__slide,
+  .founder-carousel__canvas,
+  .founder-carousel__fallback,
   .founder-carousel__next {
     transition: none !important;
   }
