@@ -69,7 +69,12 @@ export default function FounderRegister() {
     let next;
     if (event.key === "Home") next = 0;
     else if (event.key === "End") next = founders.length - 1;
-    else if (direction) next = ((activeIndexRef.current ?? 0) + direction + founders.length) % founders.length;
+    else if (direction) {
+      const focusedCard = event.target.closest?.("[data-founder-index]");
+      const focusedIndex = focusedCard ? Number(focusedCard.dataset.founderIndex) : activeIndexRef.current;
+      const origin = Number.isInteger(focusedIndex) ? focusedIndex : 0;
+      next = (origin + direction + founders.length) % founders.length;
+    }
     else return;
     event.preventDefault();
     selectFounder(next);

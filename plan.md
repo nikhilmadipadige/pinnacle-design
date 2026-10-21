@@ -17,7 +17,7 @@ The site remains an **architectural after-dark exhibition**: dark editorial spac
 
 ## Motion and implementation
 
-Use GSAP/SplitText and ScrollTrigger for the existing hero reveals, project-image masks, stats, and modal, plus discipline-drawing stroke reveals and a measured stagger for the five founder panels. Lenis remains synchronized to the GSAP ticker/ScrollTrigger; no page-wheel capture or pinned project carousel. Vanta NET stays hero-only and lazy loaded; Three.js is no longer used for the founders roster. Reduced-motion styles must not hide content or prevent founder selection.
+Use GSAP/SplitText and ScrollTrigger for the existing hero reveals, project-image masks, stats, and modal, plus discipline-drawing stroke reveals and a measured stagger for the five founder panels. Lenis remains synchronized to the GSAP ticker/ScrollTrigger; no page-wheel capture or pinned project carousel. Vanta NET stays hero-only and lazy loaded; Three.js is no longer used for the founders roster. Reduced-motion styles must not hide content or prevent founder selection, and project-dialog entrance/exit animations are skipped.
 
 ## Project structure
 
@@ -32,3 +32,10 @@ Use GSAP/SplitText and ScrollTrigger for the existing hero reveals, project-imag
 ## Delivery
 
 A GitHub push is not proof of Vercel deployment. The user-facing Vercel domain previously served an older bundle and its project binding was not visible in this session; report deployment status based on an actual live check. Replace assets and founder details only when supplied and approved.
+
+
+## Interaction refinement requested 2026-10-21
+
+- **Founders:** retain five equal-size studio-register panels and no default selection. Use a subtle 18px desktop and 12px narrower-screen stagger with GSAP ScrollTrigger reveals; keep the offset positional so card dimensions and grid tracks stay equal. Selection may lift a panel by 6px without changing its size or layout priority. Keep the existing arrow-key/Home/End controls, center the fifth card on phones, and honor reduced motion.
+- **Disciplines:** add a low-density, decorative gold particle field that drifts behind the three cards and pauses when the section is offscreen. Reveal a more detailed blueprint drawing on card hover or keyboard focus; provide an explicit, labeled toggle for touch devices. Keep the approved card descriptions readable and unchanged. Reduced-motion mode uses a static blueprint and no moving particles.
+- Reuse the existing GSAP/ScrollTrigger/Lenis setup and native React/SVG/CSS. Do not add Three.js or another dependency for these bounded interactions.

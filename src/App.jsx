@@ -10,6 +10,8 @@ import gsap from "gsap";
 import { disciplines, projects, statistics } from "./content.js";
 import VantaBackdrop from "./components/VantaBackdrop.jsx";
 import FounderRegister from "./components/FounderRegister.jsx";
+import DisciplineCard from "./components/DisciplineCard.jsx";
+import DisciplineParticles from "./components/DisciplineParticles.jsx";
 import useMotion from "./hooks/useMotion.js";
 
 const navItems = [
@@ -247,16 +249,25 @@ function ProjectDialog({ project, onClose }) {
     const image = dialog.querySelector(".project-dialog__image img");
     const copyItems = [...dialog.querySelectorAll(".project-dialog__copy > *")];
 
-    gsap.set(dialog, { autoAlpha: 0 });
-    gsap.set(inner, { y: 30, scale: 0.975, clipPath: "inset(4% 2% 0% 2%)" });
-    gsap.set(image, { scale: 1.12 });
-    dialog.showModal();
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduceMotion) {
+      gsap.set(dialog, { clearProps: "opacity,visibility" });
+      gsap.set(inner, { clearProps: "transform,clipPath,opacity,visibility" });
+      gsap.set(image, { clearProps: "transform" });
+      gsap.set(copyItems, { clearProps: "transform,opacity,visibility" });
+      dialog.showModal();
+    } else {
+      gsap.set(dialog, { autoAlpha: 0 });
+      gsap.set(inner, { y: 30, scale: 0.975, clipPath: "inset(4% 2% 0% 2%)" });
+      gsap.set(image, { scale: 1.12 });
+      dialog.showModal();
 
-    timelineRef.current = gsap.timeline({ defaults: { overwrite: "auto" } })
-      .to(dialog, { autoAlpha: 1, duration: 0.26, ease: "power1.out" })
-      .to(inner, { y: 0, scale: 1, clipPath: "inset(0% 0% 0% 0%)", duration: 0.72, ease: "expo.out" }, "-=0.08")
-      .to(image, { scale: 1, duration: 0.86, ease: "power3.out" }, "-=0.65")
-      .fromTo(copyItems, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.42, stagger: 0.045, ease: "power3.out" }, "-=0.54");
+      timelineRef.current = gsap.timeline({ defaults: { overwrite: "auto" } })
+        .to(dialog, { autoAlpha: 1, duration: 0.26, ease: "power1.out" })
+        .to(inner, { y: 0, scale: 1, clipPath: "inset(0% 0% 0% 0%)", duration: 0.72, ease: "expo.out" }, "-=0.08")
+        .to(image, { scale: 1, duration: 0.86, ease: "power3.out" }, "-=0.65")
+        .fromTo(copyItems, { y: 16, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.42, stagger: 0.045, ease: "power3.out" }, "-=0.54");
+    }
 
     return () => {
       timelineRef.current?.kill();
@@ -271,6 +282,15 @@ function ProjectDialog({ project, onClose }) {
     if (!dialog?.open || closingRef.current) return;
     closingRef.current = true;
     const inner = dialog.querySelector(".project-dialog__inner");
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      timelineRef.current?.kill();
+      gsap.killTweensOf([dialog, inner]);
+      timelineRef.current = null;
+      closingRef.current = false;
+      dialog.close();
+      return;
+    }
+
     timelineRef.current?.kill();
     timelineRef.current = gsap.timeline({
       onComplete: () => {
@@ -355,38 +375,10 @@ function Portfolio() {
   );
 }
 
-function DisciplineDrawing({ index }) {
-  const drawings = [
-    <g key="plan">
-      <path d="M24 24h112v112H24zM39 39h82v82H39z" />
-      <path d="M24 80h112M80 24v56M80 80v56M39 39l82 82" />
-      <circle cx="80" cy="80" r="4" className="discipline__drawing-point" />
-    </g>,
-    <g key="millwork">
-      <path d="M28 25h104v111H28zM40 38h80v85H40z" />
-      <path d="M40 66h80M40 94h80M67 38v28M94 66v28M67 94v29" />
-      <path d="M48 51h8M104 80h8M76 108h8" />
-    </g>,
-    <g key="light">
-      <path d="M80 22v31M39 53h82M48 53l8 34h48l8-34M62 87v12m36-12v12" />
-      <path d="M50 112h60M61 123h38M72 134h16" />
-      <path d="M34 36 25 28m101 8 9-8M80 18V8" />
-      <circle cx="80" cy="53" r="5" className="discipline__drawing-point" />
-    </g>,
-  ];
-
-  return (
-    <svg className="discipline__drawing" viewBox="0 0 160 160" fill="none" aria-hidden="true">
-      <path className="discipline__drawing-guide" d="M14 148h132M14 14h132M18 10v142M142 10v142" />
-      {drawings[index]}
-      <path className="discipline__drawing-datum" d="M14 148h54l12-12h66" />
-    </svg>
-  );
-}
-
 function Disciplines() {
   return (
     <section className="disciplines section-pad" id="disciplines" aria-labelledby="disciplines-title">
+      <DisciplineParticles />
       <div className="page-wrap">
         <div className="disciplines__head reveal">
           <SectionLabel number="03">Our Core Disciplines</SectionLabel>
@@ -394,17 +386,7 @@ function Disciplines() {
           <p>We focus on three primary pillars of interior design to produce highly personalized and visually striking residential architectures.</p>
         </div>
         <div className="discipline-list">
-          {disciplines.map((item) => (
-            <article className="discipline reveal" key={item.number}>
-              <span className="discipline__number">{item.number}</span>
-              <span className="discipline__art"><DisciplineDrawing index={Number(item.number) - 1} /></span>
-              <div className="discipline__content">
-                <h3>{item.title}</h3>
-                <p>{item.description}</p>
-              </div>
-              <span className="discipline__arrow" aria-hidden="true"><ArrowUpRight size={20} /></span>
-            </article>
-          ))}
+          {disciplines.map((item, index) => <DisciplineCard key={item.number} item={item} index={index} />)}
         </div>
       </div>
     </section>

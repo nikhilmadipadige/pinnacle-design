@@ -234,13 +234,13 @@ export default function useMotion(rootRef) {
         if (founderCards.length) {
           gsap.fromTo(
             founderCards,
-            { y: 28, autoAlpha: 0, clipPath: "inset(0 0 10% 0)" },
+            { y: 34, autoAlpha: 0, clipPath: "inset(0 0 10% 0)" },
             {
               y: 0,
               autoAlpha: 1,
               clipPath: "inset(0 0 0% 0)",
-              duration: 0.82,
-              stagger: 0.075,
+              duration: 0.88,
+              stagger: { each: 0.105, from: "start" },
               ease: "power3.out",
               scrollTrigger: { trigger: ".founder-register__grid", start: "top 82%", once: true },
             },
