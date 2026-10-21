@@ -17,8 +17,8 @@
 ## Production and hosting
 - [x] Keep the static React/Vite build, lockfile, route manifest, and Vercel configuration in the connected GitHub repository.
 - [x] Build successfully; verify the desktop rail, 390px mobile swipe layout, 3D scene, mouse drag, wheel, keyboard selection, project dialog, and reduced-motion behavior.
-- [ ] Push the approved revision to `main` and verify the repository is clean.
-- [ ] Confirm the external Vercel deployment independently after push.
+- [x] Push the revision to `main` (portfolio source commit `418065b`); the branch was clean immediately after push.
+- [ ] Re-link the Vercel project or provide deployment access: `pinnacle-ds-website.vercel.app` still serves the previous bundle, and no deployment record/project association is visible in this session.
 
 ## Pending client inputs
 - [ ] Replace the current project photos when the three final replacement images arrive.
