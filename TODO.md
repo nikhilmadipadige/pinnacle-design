@@ -3,11 +3,11 @@
 | Outcome | Status |
 |---|---|
 | Preserve approved copy, project facts, current images, palette, logo, no-enquiry decision, and five equal founders | Complete. Existing copy/palette retained; no enquiry form, biographies, roles, or portraits invented. Five founders remain equal peers. |
-| Founder interaction refinement | Complete. Five equal-size panels, no initial selection, 18px wide-screen and 12px narrower-screen stagger, GSAP ScrollTrigger entrance, keyboard navigation, centered fifth phone card, and reduced-motion behavior. |
+| Founder interaction refinement | Complete. Matches the sample’s centered editorial heading/instruction and rounded 896×600 desktop stage, with the active identity at lower left and circular next arrow at lower right. Five identically structured peers (Vijay Williams plus four placeholders) share one “Founder” label and the same front position; no invented founder copy or portraits. Desktop/tablet/phone checks confirm no horizontal overflow; pointer drag and phone swipe track during the gesture and select on release; wheel, Arrow/Home/End, focus, and reduced-motion behavior pass. |
 | Discipline interaction refinement | Complete. Restrained floating particles pause offscreen and with reduced motion; detailed blueprints open on hover/focus and via a labeled touch toggle. Existing three descriptions are preserved. |
 | Existing layout | Complete. Photo-led project section and accessible native project dialog retained; cursor remains visible/usable, and open/close motion is disabled for reduced-motion users. |
 | Build/security | Complete. Production build and `git diff --check` pass; `npm audit --omit=dev` reports 0 vulnerabilities. Vite retains its advisory that the Three.js vendor chunk exceeds 500 kB (181 kB gzip). |
-| GitHub delivery | Complete. Verified refinement commit `2fdcada` is pushed to `main`. |
+| GitHub delivery | Pending: commit the final, validated founders-only update and push to `main`. |
 | Vercel | Static build configuration is intact, but the public domain still serves the prior bundle after commit `2fdcada`. Redeploy the latest `main` commit from the Vercel project before treating the live URL as updated. |
 
 ## Awaiting client assets

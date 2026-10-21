@@ -399,8 +399,11 @@ function Founders() {
       <div className="founders__ambient" aria-hidden="true" />
       <div className="page-wrap founders__inner">
         <div className="founders__head reveal">
-          <SectionLabel number="04">Our Founders</SectionLabel>
+          <p className="founders__eyebrow">Our Founders</p>
           <h2 id="founders-title">The Visionaries <em>Behind Pinnacle</em></h2>
+          <p className="founders__intro">
+            Drag or scroll the sphere to explore the leadership team steering our spatial architecture.
+          </p>
         </div>
       </div>
       <FounderRegister />

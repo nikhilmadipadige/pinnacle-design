@@ -230,19 +230,18 @@ export default function useMotion(rootRef) {
           );
         }
 
-        const founderCards = gsap.utils.toArray(".founder-register__card", root);
-        if (founderCards.length) {
+        const founderFrame = root.querySelector(".founder-carousel__frame");
+        if (founderFrame) {
           gsap.fromTo(
-            founderCards,
-            { y: 34, autoAlpha: 0, clipPath: "inset(0 0 10% 0)" },
+            founderFrame,
+            { y: 38, autoAlpha: 0, clipPath: "inset(0 0 8% 0)" },
             {
               y: 0,
               autoAlpha: 1,
               clipPath: "inset(0 0 0% 0)",
-              duration: 0.88,
-              stagger: { each: 0.105, from: "start" },
+              duration: 1.05,
               ease: "power3.out",
-              scrollTrigger: { trigger: ".founder-register__grid", start: "top 82%", once: true },
+              scrollTrigger: { trigger: founderFrame, start: "top 82%", once: true },
             },
           );
         }
