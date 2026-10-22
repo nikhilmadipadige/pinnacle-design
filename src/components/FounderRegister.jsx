@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { X } from "lucide-react";
 import { founders, projects } from "../content.js";
 
 const TURN = 360 / founders.length;
@@ -394,6 +395,7 @@ export default function FounderRegister() {
   const panelRef = useRef(null);
   const identityRef = useRef(null);
   const philosophyRef = useRef(null);
+  const layoutTimelineRef = useRef(null);
   const trackRef = useRef({ rotationY: 0, positionY: 0 });
   const sceneRef = useRef(null);
   const slideRefs = useRef([]);
@@ -427,8 +429,8 @@ export default function FounderRegister() {
       gsap.to(trackRef.current, {
         rotationY: target,
         positionY: targetOffset,
-        duration: 0.94,
-        ease: "power2.inOut",
+        duration: 1.08,
+        ease: "power4.inOut",
         overwrite: true,
         onUpdate: applyTransform,
         onComplete: () => {
@@ -452,7 +454,7 @@ export default function FounderRegister() {
     const compact = window.matchMedia("(max-width: 760px)").matches;
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reducedMotion) {
-      gsap.set(scene, { xPercent: compact ? -3 : -13, scale: compact ? 1.03 : 1.08 });
+      gsap.set(scene, { xPercent: compact ? -3 : -15, scale: compact ? 1.04 : 1.1 });
       gsap.set(panel, { x: 0, autoAlpha: 1 });
       return () => gsap.killTweensOf([scene, panel]);
     }
@@ -460,13 +462,19 @@ export default function FounderRegister() {
     const timeline = gsap.timeline({ defaults: { overwrite: "auto" } });
     timeline
       .to(scene, {
-        xPercent: compact ? -3 : -13,
-        scale: compact ? 1.03 : 1.08,
+        xPercent: compact ? -3 : -15,
+        scale: compact ? 1.04 : 1.1,
         transformOrigin: "50% 50%",
-        duration: 1.02,
-        ease: "power3.inOut",
+        duration: 1.16,
+        ease: "power4.inOut",
       }, 0)
-      .fromTo(panel, { x: 34, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.72, ease: "power3.out" }, 0.2);
+      .fromTo(
+        panel,
+        { x: 44, autoAlpha: 0, clipPath: "inset(0 0 0 16%)" },
+        { x: 0, autoAlpha: 1, clipPath: "inset(0 0 0 0%)", duration: 0.88, ease: "power4.out" },
+        0.2,
+      );
+    layoutTimelineRef.current = timeline;
 
     return () => timeline.kill();
   }, [expanded]);
@@ -482,13 +490,13 @@ export default function FounderRegister() {
     const timeline = gsap.timeline();
     timeline.fromTo(
       identity,
-      { y: 12, autoAlpha: 0 },
-      { y: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out" },
+      { y: 18, scale: 0.97, autoAlpha: 0 },
+      { y: 0, scale: 1, autoAlpha: 1, duration: 0.62, ease: "expo.out" },
     ).fromTo(
       philosophy,
-      { y: 14, autoAlpha: 0 },
-      { y: 0, autoAlpha: 1, duration: 0.54, ease: "power3.out" },
-      "-=0.18",
+      { y: 18, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.72, ease: "power3.out" },
+      "-=0.26",
     );
     return () => timeline.kill();
   }, [detailIndex, expanded]);
@@ -507,6 +515,13 @@ export default function FounderRegister() {
   }, []);
 
   const onKeyDown = (event) => {
+    if (event.key === "Escape" && expanded) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeDetails();
+      return;
+    }
+
     let next;
     if (event.key === "ArrowRight" || event.key === "ArrowDown") next = activeIndexRef.current + 1;
     else if (event.key === "ArrowLeft" || event.key === "ArrowUp") next = activeIndexRef.current - 1;
@@ -604,6 +619,52 @@ export default function FounderRegister() {
 
   const nextIndex = wrapIndex(activeIndexRef.current + 1);
   const activeFounder = founders[detailIndex];
+  const closeDetails = () => {
+    if (!expanded) return;
+    const scene = stageRef.current?.querySelector(".founder-carousel__scene");
+    const panel = panelRef.current;
+    if (!scene || !panel) {
+      setExpanded(false);
+      return;
+    }
+
+    layoutTimelineRef.current?.kill();
+    const resetLayout = () => {
+      setExpanded(false);
+      gsap.set(scene, { clearProps: "transform" });
+      gsap.set(panel, { clearProps: "transform,opacity,visibility,clipPath" });
+      gsap.set([identityRef.current, philosophyRef.current], { clearProps: "transform,opacity,visibility" });
+    };
+
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      resetLayout();
+      return;
+    }
+
+    const timeline = gsap.timeline({ onComplete: resetLayout });
+    timeline
+      .to([identityRef.current, philosophyRef.current], {
+        y: 14,
+        autoAlpha: 0,
+        duration: 0.28,
+        stagger: 0.04,
+        ease: "power2.in",
+      }, 0)
+      .to(panel, {
+        x: 28,
+        autoAlpha: 0,
+        clipPath: "inset(0 0 0 16%)",
+        duration: 0.46,
+        ease: "power3.in",
+      }, 0.1)
+      .to(scene, {
+        xPercent: 0,
+        scale: 1,
+        duration: 1.08,
+        ease: "power4.inOut",
+      }, 0);
+    layoutTimelineRef.current = timeline;
+  };
 
   return (
     <div className="founder-register">
@@ -633,27 +694,46 @@ export default function FounderRegister() {
           />
         </div>
 
-        <div className="founder-carousel__sr-controls" role="group" aria-label="Select a founder">
+        <div
+          className="founder-carousel__founder-nav"
+          role="group"
+          aria-label="Choose a founder"
+          style={{ "--founder-progress": detailIndex / Math.max(1, founders.length - 1) }}
+        >
+          <span className="founder-carousel__founder-nav-track" aria-hidden="true">
+            <span />
+          </span>
           {founders.map((founder, index) => (
             <button
               type="button"
               key={founder.index}
-              aria-label={`Founder ${founder.index} of ${founders.length}: ${founder.label}`}
-              aria-pressed={activeIndex === index}
+              aria-label={`Show founder ${founder.index} of ${founders.length}: ${founder.label}`}
+              aria-pressed={detailIndex === index}
+              aria-controls="founder-detail-panel"
               aria-roledescription="slide"
               tabIndex={activeIndex === index ? 0 : -1}
               ref={(node) => { slideRefs.current[index] = node; }}
               onClick={() => animateTo(index, true)}
-              onFocus={() => {
-                if (!dragRef.current && activeIndexRef.current !== index) animateTo(index, true);
-              }}
             >
-              {founder.label}
+              <span>{founder.index}</span>
             </button>
           ))}
         </div>
 
-        <div className="founder-carousel__caption" ref={panelRef} aria-live="polite" aria-atomic="true">
+        <div
+          className="founder-carousel__caption"
+          id="founder-detail-panel"
+          ref={panelRef}
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <div className="founder-carousel__panel-topline">
+            <span>Founder / {activeFounder.index} — 0{founders.length}</span>
+            <button className="founder-carousel__close" type="button" onClick={closeDetails} aria-label="Close founder details">
+              <span>Close</span>
+              <X size={15} strokeWidth={1.6} />
+            </button>
+          </div>
           <div className="founder-carousel__identity" key={activeFounder.index} ref={identityRef}>
             <h3 className="founder-carousel__name">{activeFounder.label}</h3>
             <p className="founder-carousel__role">Founder</p>
