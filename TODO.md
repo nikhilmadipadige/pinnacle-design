@@ -2,15 +2,19 @@
 
 | Outcome | Status |
 |---|---|
-| Preserve approved copy, project facts, current images, palette, logo, and five equal founders | Complete. Existing copy/palette retained; no biographies, roles, or portraits invented. Five founders remain equal peers. |
-| Founder interaction refinement | Implemented, awaiting the latest visual review. Preserves the sample-led grayscale discs and corner arrivals; adds only a faint blurred architectural texture and cool bloom behind the images, with no globe/orbit graphics or competing photo. Five equal founder states, drag/swipe, wheel, keyboard, visible focus, reduced-motion and SVG/WebGL fallback remain. Founder instruction now matches disc navigation. |
-| Enquiry form | Implemented and tested. Adds name, email, project type and project notes in a responsive editorial section. The form explicitly says it is a prototype; valid dummy submit was prevented, URL unchanged, and zero fetch/XHR/beacon calls occurred. No data is sent or persisted; only a local status message appears. |
-| Year founded | Complete. The existing animated statistic displays `2023` without a thousands separator; other counters retain locale formatting. |
-| Discipline interaction refinement | Complete. Restrained floating particles pause offscreen and with reduced motion; detailed blueprints open on hover/focus and via a labeled touch toggle. Existing three descriptions are preserved. |
-| Existing layout | Complete. Photo-led project section and accessible native project dialog retained; cursor remains visible/usable, and open/close motion is disabled for reduced-motion users. |
-| Build/security | Current local correction builds; `git diff --check` passes and `npm audit --omit=dev` reports 0 vulnerabilities. Vite retains its advisory that the lazy Three.js vendor chunk exceeds 500 kB (181 kB gzip). |
-| GitHub delivery | Previous globe version `a4b4268` remains on `main` at the start of this delivery; this correction is staged for final commit/push after the final build. |
-| Vercel | The last known public bundle was stale. Check again after pushing this revision; if needed, redeploy from the Vercel project. |
+| Approved content and five equal founders | Complete. Existing copy, project facts, images, palette, and logo are retained. Vijay Williams and four editable placeholders remain equal peers; no biographies, titles, portraits, or founder hierarchy have been invented. |
+| Founder interaction refinement | Complete. The sample-led grayscale photo-disc carousel keeps the black stage, lower-left identity, lower-right circular control, and restrained cyan edge glow. GSAP uses a continuous 0.94-second eased transform; the caption commits when the new disc settles and wheel input is held through the glide. Drag, touch, keyboard, reduced motion, WebGL context loss, and the standalone SVG fallback were exercised. |
+| Body-copy readability | Complete. Descriptive copy is at least 14px across the audited sections (15px for discipline descriptions); short uppercase indices and metadata remain intentionally smaller. |
+| Site spacing and alignment | Complete. Section rhythm and heading-to-content gaps were checked at 1440px, 768px, and 390px. No horizontal overflow; discipline numbers align with their Blueprint controls; mobile and tablet layouts remain intact. |
+| Project-focus select | Complete. Native select retained; options use high-contrast light-on-dark styling and were checked with the browser picker and keyboard-capable control at desktop, tablet, and phone widths. |
+| Signature Masterpieces project 02 | Complete. The `02` index remains on the image side of the reversed card and has zero measured overlap with the copy panel at all three audited widths. |
+| Enquiry form | Complete. Responsive client-side prototype includes project details 01–04. Valid test submission is prevented, the URL is unchanged, no network request or data persistence occurs, and only a local status response is shown. |
+| Year founded | Complete. The existing animated statistic displays `2023` without a thousands separator. |
+| Discipline interaction refinement | Complete. Restrained particles pause offscreen and with reduced motion; blueprint drawings reveal on hover/focus and via the labeled touch toggle. Existing descriptions are preserved. |
+| Existing layout and motion | Complete. The photo-led project section, accessible native project dialog, Lenis/GSAP choreography, hero Vanta backdrop, visible cursor, and reduced-motion behavior are retained. |
+| Build and dependency audit | Complete. `npm run build`, `npm audit --omit=dev`, and `git diff --check` pass. Vite reports the lazy Three.js vendor chunk at 704.69 kB (181.05 kB gzip), a size advisory rather than a build failure. |
+| Delivery | The task completion message records the final commit and push outcome; deployment state is checked against the current production bundle. |
+| Vercel | Compare the public production bundle after the push. If it still serves an older bundle, redeploy the latest production revision from the Vercel project dashboard. |
 
 ## Awaiting client assets
 

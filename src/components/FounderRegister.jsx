@@ -4,13 +4,16 @@ import { founders, projects } from "../content.js";
 
 const TURN = 360 / founders.length;
 const TAU = Math.PI * 2;
-const DISC_RADIUS = 1.04;
+const DISC_RADIUS = 1.16;
+const DISC_ORBIT_RADIUS = 3.15;
+const DISC_VERTICAL_RADIUS = 1.45;
+const FALLBACK_DISC_RADIUS = 205;
 const DISC_IMAGE_INDEX = [0, 1, 2, 0, 2];
 const DISC_CROP_OFFSETS = [0, 0, 0, 0.13, -0.13];
 const wrapIndex = (index) => (index + founders.length) % founders.length;
 const nearestEquivalentRotation = (target, current) => target + 360 * Math.round((current - target) / 360);
 
-function ImageDiscFallback({ activeIndex, rotation }) {
+function ImageDiscFallback({ activeIndex, rotation, verticalOffset }) {
   const discs = founders.map((_, index) => {
     const baseAngle = (index * TAU) / founders.length;
     const angle = (index * TAU) / founders.length + (rotation * Math.PI) / 180;
@@ -21,11 +24,11 @@ function ImageDiscFallback({ activeIndex, rotation }) {
       index,
       image: projects[DISC_IMAGE_INDEX[index]].image,
       cropAnchor: index === 3 ? "xMinYMid slice" : index === 4 ? "xMaxYMid slice" : "xMidYMid slice",
-      x: 450 + Math.sin(angle) * 420,
-      y: 270 + (Math.sin(baseAngle) - Math.sin((activeIndex * TAU) / founders.length)) * 205,
+      x: 450 + Math.sin(angle) * 385,
+      y: 270 + Math.sin(baseAngle) * 205 - (verticalOffset / DISC_VERTICAL_RADIUS) * 205,
       depth,
       visibility,
-      scale: depth > 0.96 ? 1 : 0.16 + depth * 0.22,
+      scale: 0.24 + 0.76 * depth ** 2.4,
     };
   });
 
@@ -39,7 +42,7 @@ function ImageDiscFallback({ activeIndex, rotation }) {
       <defs>
         {discs.map(({ index }) => (
           <clipPath id={`founder-disc-clip-${index}`} key={index}>
-            <circle r="184" />
+            <circle r={FALLBACK_DISC_RADIUS - 3} />
           </clipPath>
         ))}
       </defs>
@@ -53,26 +56,26 @@ function ImageDiscFallback({ activeIndex, rotation }) {
             opacity={visibility}
             className={index === activeIndex ? "founder-carousel__fallback-disc is-active" : "founder-carousel__fallback-disc"}
           >
-            <circle r="187" className="founder-carousel__fallback-disc-shadow" />
+            <circle r={FALLBACK_DISC_RADIUS + 3} className="founder-carousel__fallback-disc-shadow" />
             <image
               href={image}
-              x="-184"
-              y="-184"
-              width="368"
-              height="368"
+              x={-(FALLBACK_DISC_RADIUS - 3)}
+              y={-(FALLBACK_DISC_RADIUS - 3)}
+              width={(FALLBACK_DISC_RADIUS - 3) * 2}
+              height={(FALLBACK_DISC_RADIUS - 3) * 2}
               preserveAspectRatio={cropAnchor}
               clipPath={`url(#founder-disc-clip-${index})`}
               className="founder-carousel__fallback-image"
               style={{ "--disc-brightness": 0.42 + depth * 0.58 }}
             />
-            <circle r="184" className="founder-carousel__fallback-disc-edge" />
+            <circle r={FALLBACK_DISC_RADIUS - 3} className="founder-carousel__fallback-disc-edge" />
           </g>
         ))}
     </svg>
   );
 }
 
-function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRef, setFallbackRotation, fallbackRotation }) {
+function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRef, setFallbackTransform, fallbackTransform }) {
   const canvasRef = useRef(null);
   const [webglReady, setWebglReady] = useState(false);
 
@@ -120,7 +123,7 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
     const onContextLost = (event) => {
       event.preventDefault();
       cancelled = true;
-      setFallbackRotation(trackRef.current.rotationY);
+      setFallbackTransform({ ...trackRef.current });
       setWebglReady(false);
       disposeResources();
     };
@@ -184,9 +187,9 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         const discPositions = founders.map((_, index) => {
           const angle = (index / founders.length) * TAU;
           return new THREE.Vector3(
-            Math.sin(angle) * 3.45,
-            -Math.sin(angle) * 1.85,
-            Math.cos(angle) * 3.45,
+            Math.sin(angle) * DISC_ORBIT_RADIUS,
+            -Math.sin(angle) * DISC_VERTICAL_RADIUS,
+            Math.cos(angle) * DISC_ORBIT_RADIUS,
           );
         });
         const discs = founders.map((_, index) => {
@@ -274,9 +277,9 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         const render = () => renderer?.render(scene, camera);
         const updateDepth = () => discs.forEach((disc) => {
           disc.getWorldPosition(worldPosition);
-          const frontness = THREE.MathUtils.clamp((worldPosition.z + 3.45) / 6.9, 0, 1);
+          const frontness = THREE.MathUtils.clamp((worldPosition.z + DISC_ORBIT_RADIUS) / (2 * DISC_ORBIT_RADIUS), 0, 1);
           const visibility = THREE.MathUtils.smoothstep(frontness, 0.2, 0.55);
-          disc.scale.setScalar(frontness > 0.96 ? 1 : 0.1 + frontness * 0.44);
+          disc.scale.setScalar(0.24 + 0.76 * frontness ** 2.4);
           disc.userData.imageMaterial.uniforms.uBrightness.value = 0.26 + frontness * 0.74;
           disc.userData.imageMaterial.uniforms.uOpacity.value = visibility;
           disc.userData.edgeMaterial.opacity = visibility * 0.28;
@@ -285,17 +288,13 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           inverseCompositionQuaternion.copy(composition.quaternion).invert();
           disc.quaternion.copy(inverseCompositionQuaternion).multiply(facingQuaternion);
         });
-        const centerActiveDisc = () => {
-          composition.position.y = -discPositions[wrapIndex(activeIndexRef.current)].y;
-        };
-        const setRotation = (degrees) => {
+        const setTransform = (degrees, verticalOffset) => {
           composition.rotation.y = THREE.MathUtils.degToRad(degrees);
-          centerActiveDisc();
+          composition.position.y = verticalOffset;
           updateDepth();
           render();
         };
         const setActive = () => {
-          centerActiveDisc();
           updateDepth();
           render();
         };
@@ -308,14 +307,22 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           const aspect = width / height;
           camera.aspect = aspect;
           camera.fov = aspect < 0.9 ? 39 : aspect < 1.25 ? 36 : 34;
-          camera.position.z = aspect < 0.9 ? 9.4 : aspect < 1.25 ? 9.1 : 8.8;
+          camera.position.z = aspect < 0.9 ? 8.8 : aspect < 1.25 ? 9.1 : 8.8;
           camera.updateProjectionMatrix();
-          composition.scale.setScalar(aspect < 0.9 ? 0.86 : aspect < 1.25 ? 0.93 : 1);
+          composition.scale.setScalar(aspect < 0.9 ? 0.95 : aspect < 1.25 ? 0.96 : 1);
           renderer.setSize(width, height, false);
-          setRotation(trackRef.current.rotationY);
+          setTransform(trackRef.current.rotationY, trackRef.current.positionY);
         };
 
-        sceneRef.current = { renderer, scene, camera, setRotation, setActive, render };
+        sceneRef.current = {
+          renderer,
+          scene,
+          camera,
+          setTransform,
+          setActive,
+          centerOffset: (index) => -discPositions[wrapIndex(index)].y,
+          render,
+        };
         resize();
         setActive(activeIndexRef.current);
         resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
@@ -324,7 +331,7 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         if (!cancelled) setWebglReady(true);
       } catch {
         stopResizeObservation();
-        setFallbackRotation(trackRef.current.rotationY);
+        setFallbackTransform({ ...trackRef.current });
         disposeResources();
         setWebglReady(false);
       }
@@ -348,12 +355,16 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
       canvas.removeEventListener("webglcontextlost", onContextLost);
       disposeResources();
     };
-  }, [activeIndexRef, frameRef, sceneRef, setFallbackRotation, trackRef]);
+  }, [activeIndexRef, frameRef, sceneRef, setFallbackTransform, trackRef]);
 
   return (
     <div className={`founder-carousel__scene${webglReady ? " is-webgl-ready" : ""}`} aria-hidden="true">
       <canvas className="founder-carousel__canvas" ref={canvasRef} />
-      <ImageDiscFallback activeIndex={activeIndex} rotation={fallbackRotation} />
+      <ImageDiscFallback
+        activeIndex={activeIndex}
+        rotation={fallbackTransform.rotationY}
+        verticalOffset={fallbackTransform.positionY}
+      />
     </div>
   );
 }
@@ -361,9 +372,9 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
 export default function FounderRegister() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const [fallbackRotation, setFallbackRotation] = useState(0);
+  const [fallbackTransform, setFallbackTransform] = useState({ rotationY: 0, positionY: 0 });
   const stageRef = useRef(null);
-  const trackRef = useRef({ rotationY: 0 });
+  const trackRef = useRef({ rotationY: 0, positionY: 0 });
   const sceneRef = useRef(null);
   const slideRefs = useRef([]);
   const activeIndexRef = useRef(0);
@@ -372,35 +383,42 @@ export default function FounderRegister() {
   const wheelTimerRef = useRef(null);
   const wheelHandlerRef = useRef(null);
 
-  const applyRotation = () => {
-    if (sceneRef.current) sceneRef.current.setRotation(trackRef.current.rotationY);
-    else setFallbackRotation(trackRef.current.rotationY);
+  const applyTransform = () => {
+    if (sceneRef.current) sceneRef.current.setTransform(trackRef.current.rotationY, trackRef.current.positionY);
+    else setFallbackTransform({ ...trackRef.current });
   };
 
   const animateTo = (index) => {
     const next = wrapIndex(index);
     activeIndexRef.current = next;
-    setActiveIndex(next);
     const target = nearestEquivalentRotation(-next * TURN, trackRef.current.rotationY);
+    const targetOffset = sceneRef.current?.centerOffset(next)
+      ?? Math.sin((next * TAU) / founders.length) * DISC_VERTICAL_RADIUS;
     gsap.killTweensOf(trackRef.current);
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       trackRef.current.rotationY = target;
-      applyRotation();
+      trackRef.current.positionY = targetOffset;
+      setActiveIndex(next);
+      applyTransform();
     } else {
       gsap.to(trackRef.current, {
         rotationY: target,
-        duration: 0.92,
-        ease: "power3.inOut",
+        positionY: targetOffset,
+        duration: 0.94,
+        ease: "power2.inOut",
         overwrite: true,
-        onUpdate: applyRotation,
+        onUpdate: applyTransform,
+        onComplete: () => {
+          if (activeIndexRef.current === next) setActiveIndex(next);
+        },
       });
     }
   };
 
   useEffect(() => {
     sceneRef.current?.setActive(activeIndex);
-    sceneRef.current?.setRotation(trackRef.current.rotationY);
+    sceneRef.current?.setTransform(trackRef.current.rotationY, trackRef.current.positionY);
   }, [activeIndex]);
 
   useEffect(() => {
@@ -460,7 +478,7 @@ export default function FounderRegister() {
     }
     if (!drag.moved) return;
     trackRef.current.rotationY = drag.startRotation + deltaX * 0.43;
-    applyRotation();
+    applyTransform();
   };
 
   const finishPointer = (event) => {
@@ -484,14 +502,21 @@ export default function FounderRegister() {
     const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
     event.preventDefault();
     event.stopPropagation();
-    if (Math.abs(delta) < 12 || wheelLockRef.current) return;
+    if (Math.abs(delta) < 12) return;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      animateTo(activeIndexRef.current + (delta > 0 ? 1 : -1));
+      return;
+    }
+    if (wheelLockRef.current) return;
     wheelLockRef.current = true;
-    wheelTimerRef.current = window.setTimeout(() => { wheelLockRef.current = false; }, 460);
+    window.clearTimeout(wheelTimerRef.current);
+    wheelTimerRef.current = window.setTimeout(() => { wheelLockRef.current = false; }, 1000);
     animateTo(activeIndexRef.current + (delta > 0 ? 1 : -1));
   };
   wheelHandlerRef.current = onWheel;
 
-  const nextIndex = wrapIndex(activeIndex + 1);
+  const nextIndex = wrapIndex(activeIndexRef.current + 1);
   const activeFounder = founders[activeIndex];
 
   return (
@@ -517,8 +542,8 @@ export default function FounderRegister() {
             activeIndexRef={activeIndexRef}
             trackRef={trackRef}
             sceneRef={sceneRef}
-            setFallbackRotation={setFallbackRotation}
-            fallbackRotation={fallbackRotation}
+            setFallbackTransform={setFallbackTransform}
+            fallbackTransform={fallbackTransform}
           />
         </div>
 

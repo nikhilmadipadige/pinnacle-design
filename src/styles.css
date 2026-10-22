@@ -79,7 +79,7 @@ img {
 }
 
 .section-pad {
-  padding-block: clamp(92px, 11vw, 168px);
+  padding-block: clamp(80px, 9vw, 136px);
 }
 
 .skip-link {
@@ -1739,7 +1739,7 @@ img {
 
   .philosophy__lead,
   .philosophy__body {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .philosophy__qualities {
@@ -1748,7 +1748,7 @@ img {
   }
 
   .quality p {
-    font-size: 10px;
+    font-size: 13px;
   }
 
   .portfolio__head {
@@ -1758,7 +1758,7 @@ img {
 
   .portfolio__head > p {
     margin-top: 17px;
-    font-size: 10px;
+    font-size: 14px;
   }
 
   .portfolio__grid {
@@ -2825,13 +2825,11 @@ img {
   }
 
   .portfolio-panel__description {
-    display: -webkit-box;
+    display: block;
     margin-top: 12px;
-    overflow: hidden;
-    font-size: 10px;
+    overflow: visible;
+    font-size: 14px;
     line-height: 1.6;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
   }
 
   .portfolio-panel__spec {
@@ -3457,8 +3455,8 @@ img {
 .philosophy__lead,
 .philosophy__body {
   max-width: 620px;
-  font-size: 13px;
-  line-height: 1.9;
+  font-size: clamp(14px, 0.92vw, 16px);
+  line-height: 1.8;
 }
 
 .philosophy__qualities {
@@ -3484,9 +3482,9 @@ img {
 }
 
 .quality p {
-  color: var(--muted-dim);
-  font-size: 10px;
-  line-height: 1.7;
+  color: rgba(245, 243, 239, 0.68);
+  font-size: 14px;
+  line-height: 1.72;
 }
 
 .text-link {
@@ -3502,7 +3500,7 @@ img {
 
 .portfolio--exhibition {
   position: relative;
-  padding-block: clamp(94px, 12vw, 168px) !important;
+  padding-block: clamp(84px, 9.5vw, 142px) !important;
   overflow: clip;
   background:
     radial-gradient(ellipse at 88% 15%, rgba(47, 65, 57, 0.12), transparent 30%),
@@ -3514,7 +3512,7 @@ img {
   grid-template-columns: minmax(0, 1.1fr) minmax(260px, 0.55fr);
   align-items: end;
   gap: clamp(40px, 8vw, 132px);
-  margin-bottom: clamp(34px, 5vw, 66px);
+  margin-bottom: clamp(32px, 4.4vw, 58px);
 }
 
 .portfolio--exhibition .portfolio__head h2 {
@@ -3529,9 +3527,9 @@ img {
   max-width: 410px;
   margin: 0 0 4px;
   color: rgba(245, 243, 239, 0.66);
-  font-size: 12px;
-  font-weight: 300;
-  line-height: 1.9;
+  font-size: clamp(14px, 0.85vw, 16px);
+  font-weight: 400;
+  line-height: 1.78;
 }
 
 .portfolio--exhibition .section-label__number {
@@ -3657,6 +3655,12 @@ img {
   pointer-events: none;
 }
 
+.portfolio--exhibition .portfolio-panel--reverse .portfolio-panel__image-index {
+  right: 5%;
+  left: auto;
+  text-align: right;
+}
+
 .portfolio-panel__image-subtitle {
   position: absolute;
   z-index: 2;
@@ -3740,9 +3744,9 @@ img {
   display: block;
   margin-top: 22px;
   color: rgba(245, 243, 239, 0.68);
-  font-size: 11px;
-  font-weight: 300;
-  line-height: 1.8;
+  font-size: clamp(14px, 0.9vw, 16px);
+  font-weight: 400;
+  line-height: 1.72;
 }
 
 .portfolio--exhibition .portfolio-panel__spec {
@@ -3891,8 +3895,8 @@ img {
 
 .project-dialog__copy > p {
   color: rgba(245, 243, 239, 0.7);
-  font-size: 12px;
-  line-height: 1.85;
+  font-size: 15px;
+  line-height: 1.75;
 }
 
 .project-dialog__copy h3 {
@@ -4497,7 +4501,7 @@ img {
 
   .philosophy__lead,
   .philosophy__body {
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .portfolio--exhibition {
@@ -4517,7 +4521,7 @@ img {
 
   .portfolio--exhibition .portfolio__head > p {
     max-width: 560px;
-    font-size: 11px;
+    font-size: 14px;
   }
 
   .portfolio--exhibition .portfolio__progress {
@@ -4597,7 +4601,7 @@ img {
 
   .portfolio-panel__description {
     margin-top: 16px;
-    font-size: 10px;
+    font-size: 14px;
     line-height: 1.75;
   }
 
@@ -4831,7 +4835,7 @@ img {
   }
 
   .portfolio-panel__description {
-    font-size: 9px;
+    font-size: 14px;
   }
 
   .founder-orbit-control {
@@ -4877,7 +4881,7 @@ img {
 
 /* ── Founders: architectural studio register, not a floating orbit ────────── */
 .founders--orbital {
-  padding-block: clamp(88px, 9vw, 132px) clamp(88px, 10vw, 144px);
+  padding-block: clamp(82px, 8.4vw, 122px) clamp(78px, 7.8vw, 116px);
   background:
     radial-gradient(ellipse at 82% 35%, rgba(91, 71, 46, 0.11), transparent 29%),
     linear-gradient(180deg, #171614 0%, #141312 58%, #111110 100%);
@@ -5244,7 +5248,7 @@ img {
 .disciplines__head {
   grid-template-columns: minmax(0, 1.2fr) minmax(290px, 0.65fr);
   gap: 28px clamp(42px, 8vw, 122px);
-  margin-bottom: clamp(48px, 6vw, 82px);
+  margin-bottom: clamp(38px, 4.6vw, 64px);
 }
 
 .disciplines__head h2 {
@@ -5305,8 +5309,9 @@ img {
 .discipline__number {
   grid-column: 1;
   grid-row: 1;
+  align-self: center;
   color: var(--gold-light);
-  font-size: 13px;
+  font-size: 14px;
   letter-spacing: 0.13em;
 }
 
@@ -5324,7 +5329,7 @@ img {
   grid-column: 1 / -1;
   grid-row: 2;
   place-items: center;
-  margin-block: 15px 18px;
+  margin-block: 12px 15px;
   overflow: hidden;
   border-bottom: 1px solid rgba(245, 243, 239, 0.11);
   background:
@@ -5391,8 +5396,9 @@ img {
   max-width: 38ch;
   margin: 0;
   color: rgba(245, 243, 239, 0.76);
-  font-size: clamp(13px, 1.1vw, 15px);
-  line-height: 1.78;
+  font-size: clamp(15px, 0.95vw, 17px);
+  font-weight: 400;
+  line-height: 1.72;
 }
 
 @media (max-width: 1050px) {
@@ -5738,6 +5744,7 @@ img {
   min-height: 34px;
   grid-column: 2;
   grid-row: 1;
+  align-self: center;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
@@ -6408,10 +6415,14 @@ img {
   --carousel-radius: 0px;
   border-color: rgba(245, 243, 239, 0.13);
   background:
+    radial-gradient(ellipse at 50% 54%, rgba(18, 111, 129, 0.18), transparent 58%),
     radial-gradient(ellipse at 50% 47%, rgba(197, 168, 128, 0.105), transparent 36%),
     radial-gradient(ellipse at 50% 52%, rgba(65, 71, 58, 0.055), transparent 62%),
     #080808;
-  box-shadow: 0 32px 88px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  box-shadow:
+    0 32px 88px rgba(0, 0, 0, 0.28),
+    0 10px 70px -38px rgba(28, 151, 171, 0.74),
+    inset 0 1px 0 rgba(255, 255, 255, 0.025);
   perspective: none;
 }
 
@@ -6672,7 +6683,10 @@ img {
   z-index: 1;
   border-color: rgba(245, 243, 239, 0.14);
   background: #030303;
-  box-shadow: 0 24px 68px rgba(0, 0, 0, 0.36), 0 28px 64px rgba(5, 101, 136, 0.21);
+  box-shadow:
+    0 24px 68px rgba(0, 0, 0, 0.36),
+    0 30px 84px rgba(5, 101, 136, 0.34),
+    0 0 42px -12px rgba(36, 166, 185, 0.24);
   perspective: none;
 }
 
@@ -6683,7 +6697,10 @@ img {
 
 .founder-carousel__frame:focus-within {
   border-color: rgba(216, 193, 159, 0.66);
-  box-shadow: 0 0 0 1px rgba(216, 193, 159, 0.16), 0 26px 74px rgba(0, 0, 0, 0.32);
+  box-shadow:
+    0 0 0 1px rgba(216, 193, 159, 0.16),
+    0 26px 74px rgba(0, 0, 0, 0.32),
+    0 30px 74px rgba(5, 101, 136, 0.27);
 }
 
 .founder-carousel__field {
@@ -6779,7 +6796,7 @@ img {
 .founder-carousel__field {
   background-color: #030303;
   background-image:
-    radial-gradient(ellipse at 50% 48%, rgba(11, 71, 83, 0.13), transparent 67%);
+    radial-gradient(ellipse at 50% 48%, rgba(11, 71, 83, 0.27), transparent 67%);
 }
 
 .founder-carousel__field::before {
@@ -6788,13 +6805,13 @@ img {
   inset: -8%;
   transform: scale(1.06);
   background-image:
-    linear-gradient(90deg, rgba(3, 3, 3, 0.78), rgba(3, 3, 3, 0.82)),
+    linear-gradient(90deg, rgba(3, 3, 3, 0.62), rgba(3, 3, 3, 0.68)),
     url("/images/partition-D-xaQNPb.jpg");
   background-position: center, center 46%;
   background-size: cover;
   content: "";
-  filter: grayscale(1) blur(8px) brightness(0.75);
-  opacity: 0.5;
+  filter: grayscale(1) blur(8px) brightness(0.72);
+  opacity: 0.62;
   pointer-events: none;
 }
 
@@ -6854,9 +6871,9 @@ img {
   max-width: 390px;
   margin: 0;
   color: var(--muted);
-  font-size: 13px;
-  font-weight: 300;
-  line-height: 1.8;
+  font-size: clamp(14px, 0.9vw, 16px);
+  font-weight: 400;
+  line-height: 1.75;
 }
 
 .enquiry__visual {
@@ -6973,7 +6990,7 @@ img {
   outline: none;
   background: transparent;
   color: var(--cream);
-  font: 300 13px/1.55 var(--font-body);
+  font: 400 14px/1.6 var(--font-body);
   transition: border-color 180ms ease, box-shadow 180ms ease;
 }
 
@@ -6990,6 +7007,17 @@ img {
 
 .enquiry__field select {
   color-scheme: dark;
+}
+
+.enquiry__field select option {
+  background-color: #191816;
+  color: var(--cream);
+  font: 400 14px/1.4 var(--font-body);
+}
+
+.enquiry__field select option:checked {
+  background-color: #d8c19f;
+  color: #121212;
 }
 
 .enquiry__field input:focus-visible,
