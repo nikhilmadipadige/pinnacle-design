@@ -4,10 +4,10 @@ import { founders, projects } from "../content.js";
 
 const TURN = 360 / founders.length;
 const TAU = Math.PI * 2;
-const DISC_RADIUS = 1.3;
+const DISC_RADIUS = 1.16;
 const DISC_ORBIT_RADIUS = 3.15;
 const DISC_VERTICAL_RADIUS = 1.45;
-const FALLBACK_DISC_RADIUS = 218;
+const FALLBACK_DISC_RADIUS = 205;
 const DISC_IMAGE_INDEX = [0, 1, 2, 0, 2];
 const DISC_CROP_OFFSETS = [0, 0, 0, 0.13, -0.13];
 const wrapIndex = (index) => (index + founders.length) % founders.length;
@@ -250,6 +250,7 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           disc.add(underlay);
 
           const image = new THREE.Mesh(discGeometry, material);
+          image.name = "founder-carousel-image";
           image.position.z = 0.002;
           disc.add(image);
 
@@ -272,6 +273,8 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
         const worldPosition = new THREE.Vector3();
         const faceDirection = new THREE.Vector3();
         const forward = new THREE.Vector3(0, 0, 1);
+        const raycaster = new THREE.Raycaster();
+        const pointer = new THREE.Vector2();
         const facingQuaternion = new THREE.Quaternion();
         const inverseCompositionQuaternion = new THREE.Quaternion();
         const render = () => renderer?.render(scene, camera);
@@ -310,9 +313,6 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           camera.position.z = aspect < 0.9 ? 8.8 : aspect < 1.25 ? 9.1 : 8.8;
           camera.updateProjectionMatrix();
           composition.scale.setScalar(aspect < 0.9 ? 0.95 : aspect < 1.25 ? 0.96 : 1);
-          composition.position.x = window.matchMedia("(max-width: 760px)").matches
-            ? 0
-            : aspect < 1.15 ? -0.7 : -1.25;
           renderer.setSize(width, height, false);
           setTransform(trackRef.current.rotationY, trackRef.current.positionY);
         };
@@ -324,6 +324,18 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           setTransform,
           setActive,
           centerOffset: (index) => -discPositions[wrapIndex(index)].y,
+          pickFounder: (clientX, clientY) => {
+            const bounds = canvas.getBoundingClientRect();
+            if (!bounds.width || !bounds.height) return null;
+            pointer.x = ((clientX - bounds.left) / bounds.width) * 2 - 1;
+            pointer.y = -((clientY - bounds.top) / bounds.height) * 2 + 1;
+            raycaster.setFromCamera(pointer, camera);
+            const images = discs.flatMap((disc) => disc.children.filter((child) => child.name === "founder-carousel-image"));
+            const hit = raycaster.intersectObjects(images, false).find(({ object }) => (
+              object.material.uniforms.uOpacity.value > 0.18
+            ));
+            return hit?.object.parent?.userData.index ?? null;
+          },
           render,
         };
         resize();
@@ -374,9 +386,14 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
 
 export default function FounderRegister() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [detailIndex, setDetailIndex] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [fallbackTransform, setFallbackTransform] = useState({ rotationY: 0, positionY: 0 });
   const stageRef = useRef(null);
+  const panelRef = useRef(null);
+  const identityRef = useRef(null);
+  const philosophyRef = useRef(null);
   const trackRef = useRef({ rotationY: 0, positionY: 0 });
   const sceneRef = useRef(null);
   const slideRefs = useRef([]);
@@ -391,9 +408,11 @@ export default function FounderRegister() {
     else setFallbackTransform({ ...trackRef.current });
   };
 
-  const animateTo = (index) => {
+  const animateTo = (index, revealDetails = false) => {
     const next = wrapIndex(index);
     activeIndexRef.current = next;
+    setDetailIndex(next);
+    if (revealDetails) setExpanded(true);
     const target = nearestEquivalentRotation(-next * TURN, trackRef.current.rotationY);
     const targetOffset = sceneRef.current?.centerOffset(next)
       ?? Math.sin((next * TAU) / founders.length) * DISC_VERTICAL_RADIUS;
@@ -423,6 +442,56 @@ export default function FounderRegister() {
     sceneRef.current?.setActive(activeIndex);
     sceneRef.current?.setTransform(trackRef.current.rotationY, trackRef.current.positionY);
   }, [activeIndex]);
+
+  useEffect(() => {
+    if (!expanded) return undefined;
+    const scene = stageRef.current?.querySelector(".founder-carousel__scene");
+    const panel = panelRef.current;
+    if (!scene || !panel) return undefined;
+
+    const compact = window.matchMedia("(max-width: 760px)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reducedMotion) {
+      gsap.set(scene, { xPercent: compact ? -3 : -13, scale: compact ? 1.03 : 1.08 });
+      gsap.set(panel, { x: 0, autoAlpha: 1 });
+      return () => gsap.killTweensOf([scene, panel]);
+    }
+
+    const timeline = gsap.timeline({ defaults: { overwrite: "auto" } });
+    timeline
+      .to(scene, {
+        xPercent: compact ? -3 : -13,
+        scale: compact ? 1.03 : 1.08,
+        transformOrigin: "50% 50%",
+        duration: 1.02,
+        ease: "power3.inOut",
+      }, 0)
+      .fromTo(panel, { x: 34, autoAlpha: 0 }, { x: 0, autoAlpha: 1, duration: 0.72, ease: "power3.out" }, 0.2);
+
+    return () => timeline.kill();
+  }, [expanded]);
+
+  useEffect(() => {
+    if (!expanded || !identityRef.current || !philosophyRef.current) return undefined;
+    const identity = identityRef.current;
+    const philosophy = philosophyRef.current;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      gsap.set([identity, philosophy], { clearProps: "all" });
+      return undefined;
+    }
+    const timeline = gsap.timeline();
+    timeline.fromTo(
+      identity,
+      { y: 12, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.5, ease: "power3.out" },
+    ).fromTo(
+      philosophy,
+      { y: 14, autoAlpha: 0 },
+      { y: 0, autoAlpha: 1, duration: 0.54, ease: "power3.out" },
+      "-=0.18",
+    );
+    return () => timeline.kill();
+  }, [detailIndex, expanded]);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -460,8 +529,18 @@ export default function FounderRegister() {
       startX: event.clientX,
       startY: event.clientY,
       startRotation: trackRef.current.rotationY,
+      founderIndex: sceneRef.current?.pickFounder(event.clientX, event.clientY)
+        ?? (() => {
+          const fallbackDisc = event.target instanceof Element
+            ? event.target.closest("[data-founder-index]")
+            : null;
+          return Number(fallbackDisc?.getAttribute("opacity")) > 0.18
+            ? Number(fallbackDisc.getAttribute("data-founder-index"))
+            : NaN;
+        })(),
       moved: false,
     };
+    if (!Number.isInteger(dragRef.current.founderIndex)) dragRef.current.founderIndex = null;
     gsap.killTweensOf(trackRef.current);
     try {
       stageRef.current?.setPointerCapture?.(event.pointerId);
@@ -489,6 +568,10 @@ export default function FounderRegister() {
     if (!drag || drag.pointerId !== event.pointerId) return;
     dragRef.current = null;
     if (!drag.moved) {
+      if (drag.founderIndex !== null) {
+        animateTo(drag.founderIndex, true);
+        return;
+      }
       const selectedRotation = nearestEquivalentRotation(-activeIndexRef.current * TURN, drag.startRotation);
       if (Math.abs(drag.startRotation - selectedRotation) > 0.5) animateTo(activeIndexRef.current);
       return;
@@ -520,12 +603,12 @@ export default function FounderRegister() {
   wheelHandlerRef.current = onWheel;
 
   const nextIndex = wrapIndex(activeIndexRef.current + 1);
-  const activeFounder = founders[activeIndex];
+  const activeFounder = founders[detailIndex];
 
   return (
     <div className="founder-register">
       <div
-        className={`founder-carousel__frame${dragging ? " is-dragging" : ""}`}
+        className={`founder-carousel__frame${dragging ? " is-dragging" : ""}${expanded ? " is-expanded" : ""}`}
         ref={stageRef}
         role="region"
         aria-label="Founder carousel"
@@ -560,9 +643,9 @@ export default function FounderRegister() {
               aria-roledescription="slide"
               tabIndex={activeIndex === index ? 0 : -1}
               ref={(node) => { slideRefs.current[index] = node; }}
-              onClick={() => animateTo(index)}
+              onClick={() => animateTo(index, true)}
               onFocus={() => {
-                if (!dragRef.current && activeIndexRef.current !== index) animateTo(index);
+                if (!dragRef.current && activeIndexRef.current !== index) animateTo(index, true);
               }}
             >
               {founder.label}
@@ -570,10 +653,12 @@ export default function FounderRegister() {
           ))}
         </div>
 
-        <div className="founder-carousel__caption" aria-live="polite" aria-atomic="true">
-          <div className="founder-carousel__identity" key={activeFounder.index}>
+        <div className="founder-carousel__caption" ref={panelRef} aria-live="polite" aria-atomic="true">
+          <div className="founder-carousel__identity" key={activeFounder.index} ref={identityRef}>
             <h3 className="founder-carousel__name">{activeFounder.label}</h3>
             <p className="founder-carousel__role">Founder</p>
+          </div>
+          <div className="founder-carousel__philosophy-block" ref={philosophyRef}>
             <span className="founder-carousel__philosophy-label">Design philosophy</span>
             <p className="founder-carousel__philosophy">
               Every line has a purpose; every divider, shelf, and ceiling recess is calculated to direct flow and focus.
