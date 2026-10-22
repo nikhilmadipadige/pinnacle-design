@@ -6815,6 +6815,116 @@ img {
   pointer-events: none;
 }
 
+/* Founder carousel content: retain the existing stage and controls while giving the selected founder room to breathe. */
+.founder-carousel__fallback {
+  transform: translateX(-12%);
+}
+
+.founder-carousel__caption {
+  top: 50%;
+  right: 4%;
+  bottom: auto;
+  left: auto;
+  width: 31%;
+  max-width: 300px;
+  transform: translateY(-50%);
+  flex-direction: column;
+  align-items: stretch;
+  gap: 24px;
+  padding: 22px 18px 22px 22px;
+  border-left: 1px solid rgba(216, 193, 159, 0.42);
+  background: linear-gradient(90deg, rgba(3, 3, 3, 0.82), rgba(3, 3, 3, 0.96));
+  pointer-events: none;
+}
+
+.founder-carousel__identity {
+  max-width: none;
+}
+
+.founder-carousel__name {
+  font-size: clamp(25px, 2.55vw, 34px);
+  line-height: 1.04;
+}
+
+.founder-carousel__philosophy-label {
+  display: block;
+  margin-top: 25px;
+  color: var(--gold-light);
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.founder-carousel__philosophy {
+  margin: 9px 0 0;
+  color: rgba(245, 243, 239, 0.74);
+  font-family: var(--font-display);
+  font-size: clamp(15px, 1.45vw, 18px);
+  font-weight: 400;
+  line-height: 1.48;
+}
+
+.founder-carousel__next {
+  align-self: flex-end;
+}
+
+@media (max-width: 760px) {
+  .founder-carousel__fallback {
+    transform: none;
+  }
+
+  .founder-carousel__caption {
+    top: auto;
+    right: 16px;
+    bottom: 14px;
+    left: 16px;
+    width: auto;
+    max-width: none;
+    transform: none;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: 14px;
+    padding: 16px 14px 12px;
+    border-top: 1px solid rgba(216, 193, 159, 0.38);
+    border-left: 0;
+    background: linear-gradient(0deg, rgba(3, 3, 3, 0.97), rgba(3, 3, 3, 0.82));
+  }
+
+  .founder-carousel__identity {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .founder-carousel__name {
+    font-size: clamp(21px, 5.2vw, 28px);
+  }
+
+  .founder-carousel__philosophy-label {
+    margin-top: 15px;
+    font-size: 7px;
+  }
+
+  .founder-carousel__philosophy {
+    margin-top: 6px;
+    font-size: 14px;
+    line-height: 1.35;
+  }
+}
+
+@media (max-width: 390px) {
+  .founder-carousel__caption {
+    right: 12px;
+    left: 12px;
+    gap: 10px;
+    padding: 13px 10px 10px;
+  }
+
+  .founder-carousel__philosophy {
+    font-size: 12px;
+  }
+}
+
 .enquiry {
   position: relative;
   overflow: hidden;

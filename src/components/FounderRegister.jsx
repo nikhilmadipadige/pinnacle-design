@@ -4,10 +4,10 @@ import { founders, projects } from "../content.js";
 
 const TURN = 360 / founders.length;
 const TAU = Math.PI * 2;
-const DISC_RADIUS = 1.16;
+const DISC_RADIUS = 1.3;
 const DISC_ORBIT_RADIUS = 3.15;
 const DISC_VERTICAL_RADIUS = 1.45;
-const FALLBACK_DISC_RADIUS = 205;
+const FALLBACK_DISC_RADIUS = 218;
 const DISC_IMAGE_INDEX = [0, 1, 2, 0, 2];
 const DISC_CROP_OFFSETS = [0, 0, 0, 0.13, -0.13];
 const wrapIndex = (index) => (index + founders.length) % founders.length;
@@ -310,6 +310,9 @@ function FounderScene({ frameRef, activeIndex, activeIndexRef, trackRef, sceneRe
           camera.position.z = aspect < 0.9 ? 8.8 : aspect < 1.25 ? 9.1 : 8.8;
           camera.updateProjectionMatrix();
           composition.scale.setScalar(aspect < 0.9 ? 0.95 : aspect < 1.25 ? 0.96 : 1);
+          composition.position.x = window.matchMedia("(max-width: 760px)").matches
+            ? 0
+            : aspect < 1.15 ? -0.7 : -1.25;
           renderer.setSize(width, height, false);
           setTransform(trackRef.current.rotationY, trackRef.current.positionY);
         };
@@ -571,6 +574,10 @@ export default function FounderRegister() {
           <div className="founder-carousel__identity" key={activeFounder.index}>
             <h3 className="founder-carousel__name">{activeFounder.label}</h3>
             <p className="founder-carousel__role">Founder</p>
+            <span className="founder-carousel__philosophy-label">Design philosophy</span>
+            <p className="founder-carousel__philosophy">
+              Every line has a purpose; every divider, shelf, and ceiling recess is calculated to direct flow and focus.
+            </p>
           </div>
           <button
             className="founder-carousel__next"
